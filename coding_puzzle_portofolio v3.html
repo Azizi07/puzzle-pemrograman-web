@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coding Puzzle — Susun Website Portofolio</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --brand: #6366f1;
+    --amber: #f59e0b;
+    --ok: #16a34a;
+    --bad: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: none;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: #eef2f7;
+    color: var(--ink);
+  }
+  body.dragging-now, body.dragging-now * { cursor: grabbing !important; }
+  button, select { font: inherit; }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding: 10px 14px;
+    background: #0f172a;
+    color: #fff;
+  }
+  .brand h1 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .brand p { margin: 2px 0 0; font-size: 12px; color: #94a3b8; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .controls select {
+    max-width: 240px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #fff;
+  }
+  .btn {
+    padding: 7px 12px;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    background: #334155;
+    color: #fff;
+  }
+  .btn:hover { background: #475569; }
+  .btn.primary { background: var(--brand); }
+  .btn.primary:hover { background: #4f46e5; }
+  .btn.warn { background: #b45309; }
+  .progress-box { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #cbd5e1; }
+  .progress { width: 110px; height: 8px; border-radius: 99px; background: #334155; overflow: hidden; }
+  .progress i { display: block; height: 100%; width: 0; background: var(--amber); transition: width .2s; }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .col-right { display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; min-height: 0; min-width: 0; }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+  }
+  .panel-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--line);
+  }
+  .panel-head h2 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .panel-head .hint { margin: 2px 0 0; font-size: 11.5px; color: var(--muted); }
+  .count { font-size: 11px; font-weight: 600; background: #e2e8f0; color: #475569; padding: 1px 8px; border-radius: 99px; }
+  #panel-target .panel-head { background: #eef2ff; }
+  #panel-preview .panel-head { background: #ecfdf5; }
+  .head-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .seg { display: inline-flex; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #475569; }
+  .seg button.on { background: #0f172a; color: #fff; }
+  .mini {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #334155;
+  }
+  .mini:hover { background: #f1f5f9; }
+  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #e2e8f0; color: #475569; }
+  .badge.progressing { background: #fef08a; color: #854d0e; }
+  .badge.done { background: #bbf7d0; color: #166534; }
+  .badge.err { background: #fecaca; color: #991b1b; }
+
+  /* ---------- Zona potongan ---------- */
+  .zone-wrap { position: relative; flex: 1; min-height: 0; display: flex; }
+  .zone {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #fff;
+    -webkit-overflow-scrolling: touch;
+  }
+  #work-zone { background: #f8fafc; }
+  .zone-wrap.over .zone { background: #eef2ff; }
+  .empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+  }
+  .empty b { font-size: 34px; opacity: .6; }
+  .zone[data-filter="html"] .piece.css { display: none; }
+  .zone[data-filter="css"] .piece.html { display: none; }
+
+  .piece {
+    display: flex;
+    align-items: stretch;
+    flex: none;
+    border-radius: 8px;
+    border-left: 4px solid;
+    font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .08);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    cursor: grab;
+  }
+  .piece.html { background: #e0f2fe; border-color: #0284c7; color: #0c4a6e; }
+  .piece.css { background: #fef9c3; border-color: #ca8a04; color: #713f12; }
+  .piece .handle {
+    flex: none;
+    width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    letter-spacing: -3px;
+    opacity: .55;
+    touch-action: none;
+    cursor: grab;
+  }
+  .piece code { flex: 1; min-width: 0; padding: 6px 4px; white-space: pre-wrap; word-break: break-word; font: inherit; }
+  .piece .pbtn {
+    flex: none;
+    width: 34px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: .7;
+    border-radius: 0 8px 8px 0;
+  }
+  .piece .pbtn:hover { opacity: 1; background: rgba(0, 0, 0, .06); }
+  .piece.is-dragging { opacity: .25; }
+  .piece.ok { outline: 2px solid var(--ok); outline-offset: -1px; }
+  .piece.bad { outline: 2px solid var(--bad); outline-offset: -1px; background-image: repeating-linear-gradient(135deg, rgba(220, 38, 38, .10) 0 6px, transparent 6px 12px); }
+  .ghost {
+    position: fixed;
+    z-index: 1000;
+    margin: 0;
+    pointer-events: none;
+    opacity: .95;
+    box-shadow: 0 14px 28px rgba(15, 23, 42, .3);
+    transform: rotate(1.2deg);
+  }
+  .drop-line { flex: none; height: 4px; margin: 1px 0; border-radius: 2px; background: var(--brand); }
+  @media (pointer: coarse) {
+    .piece .handle { width: 42px; font-size: 18px; }
+    .piece .pbtn { width: 44px; font-size: 22px; }
+    .piece code { padding: 9px 4px; }
+  }
+
+  /* ---------- Frame target & preview ---------- */
+  .frame-wrap { flex: 1; min-height: 0; display: flex; justify-content: center; background: #cbd5e1; overflow: auto; }
+  .frame-wrap iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+  .wbtns { display: none; }
+  .panel.expanded {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 200;
+    border: 0;
+    border-radius: 0;
+  }
+  .panel.expanded .wbtns { display: inline-flex; }
+  .panel.expanded .frame-wrap { padding: 12px; }
+  .panel.expanded .frame-wrap iframe { box-shadow: 0 6px 24px rgba(15, 23, 42, .25); }
+  .panel.expanded .frame-wrap[data-w="375"] iframe { width: min(375px, 100%); }
+  .panel.expanded .frame-wrap[data-w="768"] iframe { width: min(768px, 100%); }
+
+  /* ---------- Tab bawah (HP) ---------- */
+  .tabs { display: none; flex: none; background: #0f172a; padding-bottom: env(safe-area-inset-bottom); }
+  .tabs button {
+    flex: 1;
+    padding: 12px 6px;
+    border: 0;
+    background: transparent;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .tabs button.on { color: #fff; box-shadow: inset 0 3px 0 var(--amber); background: #1e293b; }
+
+  /* ---------- Modal ---------- */
+  .modal { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, .55); }
+  .modal[hidden] { display: none; }
+  .modal-card { width: min(520px, 100%); max-height: 86vh; overflow: auto; background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 20px 50px rgba(0, 0, 0, .3); }
+  .modal-card h3 { margin: 0 0 8px; font-size: 20px; }
+  .modal-card p { margin: 6px 0; color: #475569; font-size: 14px; }
+  .modal-card ul { margin: 8px 0; padding-left: 20px; font-size: 14px; color: #334155; }
+  .modal-card li { margin: 4px 0; }
+  .modal-card code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .modal-card .row { display: flex; justify-content: flex-end; margin-top: 14px; }
+  .stat-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .stat { flex: 1; min-width: 120px; padding: 8px 12px; border-radius: 10px; background: #f1f5f9; font-size: 13px; }
+  .stat b { display: block; font-size: 20px; }
+
+  /* ---------- Responsif ---------- */
+  @media (max-width: 959px) {
+    .tabs { display: flex; }
+    .layout { grid-template-columns: minmax(0, 1fr); grid-auto-rows: minmax(0, 1fr); padding: 8px; gap: 8px; }
+    .col-right { display: contents; }
+    .panel { display: none; }
+    body[data-view="puzzle"] #panel-src,
+    body[data-view="puzzle"] #panel-work,
+    body[data-view="target"] #panel-target,
+    body[data-view="preview"] #panel-preview { display: flex; }
+    .panel.expanded { display: flex !important; }
+    .app-header { padding: 8px 10px; }
+    .brand h1 { font-size: 16px; }
+    .stage-desc { display: none; }
+  }
+  @media (max-width: 959px) and (min-width: 600px) {
+    .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    #panel-target, #panel-preview { grid-column: 1 / -1; }
+  }
+  @media (max-width: 599px) {
+    .brand p { display: none; }
+    .progress { width: 70px; }
+    .controls select { max-width: 100%; flex: 1 1 100%; }
+    .btn { padding: 8px 10px; font-size: 13px; }
+  }
+
+  /* ---------- Mode Hard & pilihan mode ---------- */
+  .hard-box { position: relative; overflow: hidden; display: flex; align-items: center; gap: 8px; padding: 6px 10px 8px; border-radius: 8px; background: #7c2d12; color: #ffedd5; font-size: 12px; font-weight: 600; }
+  .hard-box[hidden] { display: none; }
+  .hard-box b { min-width: 34px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .hard-box .hbar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .15); }
+  .hard-box .hbar i { display: block; height: 100%; width: 100%; background: #fb923c; }
+  .hard-box.warn { background: #b91c1c; animation: pulse .6s infinite alternate; }
+  @keyframes pulse { to { box-shadow: 0 0 0 3px rgba(248, 113, 113, .55); } }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+  .mode-card { display: flex; flex-direction: column; gap: 6px; padding: 14px; text-align: left; color: var(--ink); background: #fff; border: 2px solid #cbd5e1; border-radius: 12px; cursor: pointer; }
+  .mode-card b { font-size: 17px; }
+  .mode-card span { font-size: 13px; line-height: 1.4; color: #475569; }
+  .mode-card:hover { border-color: var(--brand); background: #eef2ff; }
+  .mode-card.hard { border-color: #fdba74; background: #fff7ed; }
+  .mode-card.hard:hover { border-color: #ea580c; background: #ffedd5; }
+  .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 600; padding: 9px 16px; border-radius: 99px; background: #0f172a; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
+  .toast[hidden] { display: none; }
+  .btn.danger { background: #b91c1c; }
+  .btn.danger:hover { background: #991b1b; }
+  .modal-card .row { gap: 8px; }
+  @media (min-width: 960px) {
+    body.hard .layout { grid-template-columns: repeat(24, minmax(0, 1fr)); grid-template-rows: repeat(12, minmax(0, 1fr)); }
+    body.hard .col-right { display: contents; }
+    body.hard .panel { grid-column: var(--gc); grid-row: var(--gr); }
+  }
+  @media (max-width: 959px) { body.hard .panel { order: var(--ord); } }
+  @media (max-width: 599px) { .mode-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-view="puzzle">
+
+<header class="app-header">
+  <div class="brand">
+    <h1>🧩 Coding Puzzle <span class="stage-desc" id="stage-desc" style="font-weight:500;font-size:12px;color:#fbbf24"></span></h1>
+    <p>Susun website portofolio: Tipografi · Text Align · Text Decoration · Transform · Flexbox · Grid</p>
+  </div>
+  <div class="controls">
+    <select id="stage" aria-label="Pilih bagian puzzle"></select>
+    <button class="btn primary" id="btn-check" type="button">✔ Periksa</button>
+    <button class="btn" id="btn-shuffle" type="button">🔀 Acak ulang</button>
+    <button class="btn warn" id="btn-solve" type="button" hidden>🔑 Kunci</button>
+    <button class="btn" id="btn-mode" type="button" hidden></button>
+    <div class="hard-box" id="hard-box" hidden title="Jendela akan berpindah tempat"><span>🔥 Pindah dalam</span><b id="hard-time">1:00</b><span class="hbar"><i id="hard-fill"></i></span></div>
+    <div class="progress-box"><div class="progress"><i id="progress-fill"></i></div><span id="progress-text">0/0</span></div>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- Kiri: kumpulan potongan -->
+  <section class="panel" id="panel-src">
+    <div class="panel-head">
+      <div>
+        <h2>🧩 Kumpulan Potongan <span class="count" id="src-count">0</span></h2>
+        <p class="hint">Seret lewat ikon ⋮⋮ atau ketuk tombol +</p>
+      </div>
+      <div class="seg" id="filter" role="group" aria-label="Saring potongan">
+        <button type="button" data-f="all" class="on">Semua</button>
+        <button type="button" data-f="html">HTML</button>
+        <button type="button" data-f="css">CSS</button>
+      </div>
+    </div>
+    <div class="zone-wrap" id="wrap-src"><div class="zone" id="src-zone" data-filter="all"></div></div>
+  </section>
+
+  <!-- Tengah: area susun -->
+  <section class="panel" id="panel-work">
+    <div class="panel-head">
+      <div>
+        <h2>📝 Area Susun <span class="count" id="work-count">0</span></h2>
+        <p class="hint">HTML urut dari atas ke bawah halaman, CSS per aturan. Urutan properti dalam satu aturan boleh bebas.</p>
+      </div>
+    </div>
+    <div class="zone-wrap" id="wrap-work">
+      <div class="zone" id="work-zone"></div>
+      <div class="empty" id="empty"><b>⇄</b><span>Tarik potongan kode ke sini</span></div>
+    </div>
+  </section>
+
+  <!-- Kanan: target + preview -->
+  <div class="col-right">
+    <section class="panel" id="panel-target">
+      <div class="panel-head">
+        <h2>🎯 Target Tampilan</h2>
+        <div class="head-tools">
+          <div class="seg wbtns" data-for="target-wrap">
+            <button type="button" data-w="auto" class="on">Auto</button>
+            <button type="button" data-w="768">Tablet</button>
+            <button type="button" data-w="375">HP</button>
+          </div>
+          <button class="mini" type="button" data-expand="panel-target">⤢ Perluas</button>
+        </div>
+      </div>
+      <div class="frame-wrap" id="target-wrap" data-w="auto">
+        <iframe id="target-frame" title="Target tampilan" sandbox="allow-same-origin"></iframe>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-preview">
+      <div class="panel-head">
+        <h2>👀 Hasil Susunan (Live) <span class="badge" id="status">Kosong</span></h2>
+        <div class="head-tools">
+          <div class="seg wbtns" data-for="preview-wrap">
+            <button type="button" data-w="auto" class="on">Auto</button>
+            <button type="button" data-w="768">Tablet</button>
+            <button type="button" data-w="375">HP</button>
+          </div>
+          <button class="mini" type="button" data-expand="panel-preview">⤢ Perluas</button>
+        </div>
+      </div>
+      <div class="frame-wrap" id="preview-wrap" data-w="auto">
+        <iframe id="preview-frame" title="Hasil susunan" sandbox="allow-same-origin"></iframe>
+      </div>
+    </section>
+  </div>
+</main>
+
+<nav class="tabs" aria-label="Tampilan">
+  <button type="button" data-view="puzzle" class="on">🧩 Puzzle</button>
+  <button type="button" data-view="target">🎯 Target</button>
+  <button type="button" data-view="preview">👀 Hasil</button>
+</nav>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="row"><button class="btn primary" type="button" id="modal-close">Tutup</button></div>
+  </div>
+</div>
+
+<div class="modal" id="mode-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mode-title">
+    <h3 id="mode-title">Pilih tingkat tantangan</h3>
+    <p>Proyek Utuh bisa dimainkan dalam dua mode.</p>
+    <div class="mode-grid">
+      <button type="button" class="mode-card" data-mode="standar"><b>🧩 Standar</b><span>Posisi keempat jendela tetap. Fokus menyusun kodenya.</span></button>
+      <button type="button" class="mode-card hard" data-mode="hard"><b>🔥 Hard</b><span>Jendela Kumpulan Potongan, Area Susun, Target, dan Hasil berpindah tempat tiap 1 menit. Siap beradaptasi!</span></button>
+    </div>
+    <div class="row"><button class="btn" type="button" id="mode-cancel">Batal</button></div>
+  </div>
+</div>
+<div class="modal" id="confirm-modal" hidden>
+  <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+    <h3 id="confirm-title">Pindah bagian?</h3>
+    <div id="confirm-body"></div>
+    <div class="row">
+      <button class="btn" type="button" id="confirm-cancel">Tetap di sini</button>
+      <button class="btn danger" type="button" id="confirm-ok">Pindah &amp; reset</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================================================
+     DATA PUZZLE
+     - HTML dipotong per BLOK LOGIKA (satu komponen = satu potongan)
+     - CSS dipotong PER BARIS
+     ===================================================================== */
+
+  const RESET = '*{box-sizing:border-box;margin:0;padding:0}\n';
+
+  const STAGES = [
+    { key: 'navbar',    label: 'Bagian 1 — Dasar & Navbar',            desc: 'Tipografi · Decoration · Flexbox' },
+    { key: 'hero',      label: 'Bagian 2 — Hero & Tombol',             desc: 'Text Align · Transform · Flexbox' },
+    { key: 'statistik', label: 'Bagian 3 — Statistik',                 desc: 'Flexbox · Tipografi' },
+    { key: 'layanan',   label: 'Bagian 4 — Layanan (Grid)',            desc: 'Grid · Transform' },
+    { key: 'karya',     label: 'Bagian 5 — Karya Pilihan (Grid)',      desc: 'Grid · Transform · Gradient' },
+    { key: 'penutup',   label: 'Bagian 6 — Testimoni & Footer',        desc: 'Text Align · Flexbox' },
+    { key: 'semua',     label: 'Proyek Utuh — Semua bagian',           desc: 'Tantangan akhir' }
+  ];
+
+  const HTML_BLOCKS = [
+    { stage: 'navbar', code:
+`<header class="navbar">
+  <a href="#" class="logo">Nusa<span>.digital</span></a>
+  <nav class="menu">
+    <a href="#layanan">Layanan</a>
+    <a href="#karya">Karya</a>
+    <a href="#kontak">Kontak</a>
+  </nav>
+</header>` },
+
+    { stage: 'hero', code:
+`<section class="hero">
+  <span class="lencana">Sejak 2018</span>
+  <h1 class="judul">Kami membangun <span class="sorot">website</span> yang bercerita</h1>
+  <p class="intro">Studio digital yang membantu bisnis tampil profesional lewat desain dan kode yang rapi.</p>
+  <div class="aksi">
+    <a href="#karya" class="tombol utama">Lihat Karya</a>
+    <a href="#kontak" class="tombol garis">Hubungi Kami</a>
+  </div>
+</section>` },
+
+    { stage: 'statistik', code:
+`<section class="statistik">
+  <div class="angka"><strong>120+</strong><span>Proyek selesai</span></div>
+  <div class="angka"><strong>45</strong><span>Klien aktif</span></div>
+  <div class="angka"><strong>8</strong><span>Tahun pengalaman</span></div>
+</section>` },
+
+    { stage: 'layanan', code:
+`<section class="layanan" id="layanan">
+  <h2 class="judul-bagian">layanan kami</h2>
+  <p class="sub-bagian">Dari ide sampai peluncuran, kami temani setiap langkahnya.</p>
+  <div class="grid-layanan">` },
+
+    { stage: 'layanan', code:
+`    <article class="kartu">
+      <span class="ikon">01</span>
+      <h3>Desain Web</h3>
+      <p>Tampilan modern yang nyaman dibuka di semua ukuran layar.</p>
+    </article>` },
+
+    { stage: 'layanan', code:
+`    <article class="kartu">
+      <span class="ikon">02</span>
+      <h3>Aplikasi Web</h3>
+      <p>Sistem internal dan layanan online yang cepat serta mudah dipakai.</p>
+    </article>` },
+
+    { stage: 'layanan', code:
+`    <article class="kartu">
+      <span class="ikon">03</span>
+      <h3>Branding</h3>
+      <p>Logo, warna, dan gaya visual yang membuat bisnis mudah diingat.</p>
+    </article>` },
+
+    { stage: 'layanan', code:
+`  </div>
+</section>` },
+
+    { stage: 'karya', code:
+`<section class="karya" id="karya">
+  <h2 class="judul-bagian">karya pilihan</h2>
+  <div class="grid-karya">` },
+
+    { stage: 'karya', code:
+`    <figure class="proyek">
+      <div class="gambar warna-1"></div>
+      <figcaption>
+        <h3>Toko Kopi Senja</h3>
+        <p>Website katalog &amp; pemesanan online</p>
+      </figcaption>
+    </figure>` },
+
+    { stage: 'karya', code:
+`    <figure class="proyek">
+      <div class="gambar warna-2"></div>
+      <figcaption>
+        <h3>Klinik Sehat Bersama</h3>
+        <p>Pendaftaran pasien &amp; jadwal dokter</p>
+      </figcaption>
+    </figure>` },
+
+    { stage: 'karya', code:
+`    <figure class="proyek">
+      <div class="gambar warna-3"></div>
+      <figcaption>
+        <h3>Kursus Digital Nusantara</h3>
+        <p>Platform belajar daring untuk siswa</p>
+      </figcaption>
+    </figure>` },
+
+    { stage: 'karya', code:
+`  </div>
+</section>` },
+
+    { stage: 'penutup', code:
+`<section class="testimoni">
+  <blockquote class="kutipan">“Hasilnya rapi, cepat, dan sesuai bayangan kami.”</blockquote>
+  <p class="penulis">— Rina Maharani, Pemilik Toko Kopi Senja</p>
+</section>` },
+
+    { stage: 'penutup', code:
+`<footer class="footer" id="kontak">
+  <p class="footer-judul">Siap memulai proyek?</p>
+  <a href="#" class="tombol utama">halo@nusadigital.example</a>
+  <small>© 2026 Nusa Digital Studio. Semua hak dilindungi.</small>
+</footer>` }
+  ];
+
+  // R(id, tahap, selektor, [properti...])
+  function R(id, stage, selector, props) {
+    return { id: id, stage: stage, selector: selector,
+             lines: [selector + ' {'].concat(props.map(function (p) { return '  ' + p; }), ['}']) };
+  }
+
+  const RULES = [
+    /* ---- Bagian 1: Dasar & Navbar ---- */
+    R('body', 'navbar', 'body', [
+      'font-family: "Segoe UI", Arial, sans-serif;',
+      'line-height: 1.6;',
+      'color: #1e293b;',
+      'background-color: #f8fafc;']),
+    R('navbar', 'navbar', '.navbar', [
+      'display: flex;',
+      'justify-content: space-between;',
+      'align-items: center;',
+      'flex-wrap: wrap;',
+      'gap: 12px;',
+      'padding: 16px 24px;',
+      'background-color: #0f172a;']),
+    R('logo', 'navbar', '.logo', [
+      'font-size: 22px;',
+      'font-weight: 800;',
+      'letter-spacing: 1px;',
+      'color: white;',
+      'text-decoration: none;']),
+    R('logo-span', 'navbar', '.logo span', [
+      'color: #f59e0b;']),
+    R('menu', 'navbar', '.menu', [
+      'display: flex;',
+      'gap: 20px;']),
+    R('menu-a', 'navbar', '.menu a', [
+      'color: #cbd5e1;',
+      'font-size: 13px;',
+      'letter-spacing: 1px;',
+      'text-transform: uppercase;',
+      'text-decoration: none;']),
+    R('menu-a-hover', 'navbar', '.menu a:hover', [
+      'color: #f59e0b;',
+      'text-decoration: underline;']),
+
+    /* ---- Bagian 2: Hero & Tombol ---- */
+    R('hero', 'hero', '.hero', [
+      'display: flex;',
+      'flex-direction: column;',
+      'align-items: center;',
+      'gap: 18px;',
+      'padding: 64px 24px;',
+      'text-align: center;',
+      'background-color: #0f172a;',
+      'color: white;']),
+    R('lencana', 'hero', '.lencana', [
+      'padding: 4px 14px;',
+      'border: 1px solid #f59e0b;',
+      'border-radius: 999px;',
+      'color: #f59e0b;',
+      'font-size: 12px;',
+      'letter-spacing: 2px;',
+      'text-transform: uppercase;',
+      'transform: rotate(-3deg);']),
+    R('judul', 'hero', '.judul', [
+      'max-width: 720px;',
+      'font-size: clamp(28px, 6vw, 48px);',
+      'font-weight: 800;',
+      'line-height: 1.2;']),
+    R('sorot', 'hero', '.sorot', [
+      'color: #f59e0b;',
+      'text-decoration: underline;',
+      'text-decoration-style: wavy;',
+      'text-underline-offset: 6px;']),
+    R('intro', 'hero', '.intro', [
+      'max-width: 560px;',
+      'font-size: 18px;',
+      'color: #cbd5e1;']),
+    R('aksi', 'hero', '.aksi', [
+      'display: flex;',
+      'flex-wrap: wrap;',
+      'justify-content: center;',
+      'gap: 12px;']),
+    R('tombol', 'hero', '.tombol', [
+      'padding: 12px 24px;',
+      'border-radius: 8px;',
+      'font-size: 14px;',
+      'font-weight: 700;',
+      'text-transform: uppercase;',
+      'text-decoration: none;']),
+    R('tombol-utama', 'hero', '.tombol.utama', [
+      'background-color: #f59e0b;',
+      'color: #0f172a;']),
+    R('tombol-garis', 'hero', '.tombol.garis', [
+      'border: 2px solid white;',
+      'color: white;']),
+    R('tombol-hover', 'hero', '.tombol:hover', [
+      'transform: translateY(-3px);']),
+
+    /* ---- Bagian 3: Statistik ---- */
+    R('statistik', 'statistik', '.statistik', [
+      'display: flex;',
+      'justify-content: space-around;',
+      'flex-wrap: wrap;',
+      'gap: 20px;',
+      'padding: 32px 24px;',
+      'background-color: white;']),
+    R('angka', 'statistik', '.angka', [
+      'display: flex;',
+      'flex-direction: column;',
+      'align-items: center;']),
+    R('angka-strong', 'statistik', '.angka strong', [
+      'font-size: 32px;',
+      'color: #0f172a;']),
+    R('angka-span', 'statistik', '.angka span', [
+      'font-size: 13px;',
+      'letter-spacing: 1px;',
+      'text-transform: uppercase;',
+      'color: #64748b;']),
+
+    /* ---- Bagian 4: Layanan ---- */
+    R('bagian', 'layanan', '.layanan, .karya', [
+      'max-width: 1100px;',
+      'margin: 0 auto;',
+      'padding: 56px 24px;']),
+    R('judul-bagian', 'layanan', '.judul-bagian', [
+      'margin-bottom: 8px;',
+      'font-size: 28px;',
+      'text-align: center;',
+      'text-transform: capitalize;']),
+    R('sub-bagian', 'layanan', '.sub-bagian', [
+      'margin-bottom: 32px;',
+      'color: #64748b;',
+      'text-align: center;']),
+    R('grid-layanan', 'layanan', '.grid-layanan', [
+      'display: grid;',
+      'grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));',
+      'gap: 20px;']),
+    R('kartu', 'layanan', '.kartu', [
+      'padding: 24px;',
+      'background-color: white;',
+      'border-radius: 12px;',
+      'box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);',
+      'transition: transform 0.2s;']),
+    R('kartu-hover', 'layanan', '.kartu:hover', [
+      'transform: translateY(-6px);']),
+    R('ikon', 'layanan', '.ikon', [
+      'display: inline-block;',
+      'margin-bottom: 12px;',
+      'font-size: 28px;',
+      'font-weight: 800;',
+      'color: #f59e0b;']),
+    R('kartu-h3', 'layanan', '.kartu h3', [
+      'margin-bottom: 8px;',
+      'font-size: 18px;']),
+    R('kartu-p', 'layanan', '.kartu p', [
+      'font-size: 15px;',
+      'color: #64748b;']),
+
+    /* ---- Bagian 5: Karya Pilihan ---- */
+    R('grid-karya', 'karya', '.grid-karya', [
+      'display: grid;',
+      'grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));',
+      'gap: 24px;',
+      'margin-top: 32px;']),
+    R('proyek', 'karya', '.proyek', [
+      'overflow: hidden;',
+      'background-color: white;',
+      'border-radius: 12px;',
+      'box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);']),
+    R('gambar', 'karya', '.gambar', [
+      'height: 160px;',
+      'transition: transform 0.3s;']),
+    R('warna-1', 'karya', '.warna-1', [
+      'background: linear-gradient(135deg, #f59e0b, #ef4444);']),
+    R('warna-2', 'karya', '.warna-2', [
+      'background: linear-gradient(135deg, #06b6d4, #6366f1);']),
+    R('warna-3', 'karya', '.warna-3', [
+      'background: linear-gradient(135deg, #22c55e, #0ea5e9);']),
+    R('proyek-hover', 'karya', '.proyek:hover .gambar', [
+      'transform: scale(1.08);']),
+    R('figcaption', 'karya', 'figcaption', [
+      'padding: 16px 20px;']),
+    R('figcaption-h3', 'karya', 'figcaption h3', [
+      'font-size: 18px;']),
+    R('figcaption-p', 'karya', 'figcaption p', [
+      'font-size: 14px;',
+      'color: #64748b;']),
+
+    /* ---- Bagian 6: Testimoni & Footer ---- */
+    R('testimoni', 'penutup', '.testimoni', [
+      'padding: 56px 24px;',
+      'text-align: center;',
+      'background-color: #fef3c7;']),
+    R('kutipan', 'penutup', '.kutipan', [
+      'max-width: 640px;',
+      'margin: 0 auto 16px;',
+      'font-size: 22px;',
+      'font-style: italic;',
+      'font-weight: 600;']),
+    R('penulis', 'penutup', '.penulis', [
+      'font-size: 14px;',
+      'letter-spacing: 1px;',
+      'text-transform: uppercase;',
+      'color: #92400e;']),
+    R('footer', 'penutup', '.footer', [
+      'display: flex;',
+      'flex-direction: column;',
+      'align-items: center;',
+      'gap: 14px;',
+      'padding: 48px 24px;',
+      'text-align: center;',
+      'background-color: #0f172a;',
+      'color: white;']),
+    R('footer-judul', 'penutup', '.footer-judul', [
+      'font-size: 24px;',
+      'font-weight: 700;']),
+    R('footer-small', 'penutup', '.footer small', [
+      'color: #94a3b8;'])
+  ];
+
+  /* =====================================================================
+     UTIL
+     ===================================================================== */
+  const $ = function (s) { return document.querySelector(s); };
+  const $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  const srcZone = $('#src-zone');
+  const workZone = $('#work-zone');
+  const params = (function () { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(''); } })();
+
+  function store(key, val) { try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; } }
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* =====================================================================
+     IFRAME (preview tidak reload, jadi posisi scroll tetap)
+     ===================================================================== */
+  function Frame(iframe) {
+    const skeleton = '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+      '<style id="b"></style><style id="u"></style></head><body><div id="r"></div></body></html>';
+    let ready = false, pending = null, fallback = false;
+    iframe.addEventListener('load', function () {
+      if (fallback) return;
+      ready = true;
+      if (pending) apply();
+    });
+    function viaSrcdoc() {
+      fallback = true;
+      iframe.srcdoc = '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">' +
+        '<meta name="viewport" content="width=device-width,initial-scale=1"><style>' +
+        pending.base + pending.css + '</style></head><body>' + pending.html + '</body></html>';
+    }
+    function apply() {
+      try {
+        const d = iframe.contentDocument;
+        d.getElementById('b').textContent = pending.base;
+        d.getElementById('u').textContent = pending.css;
+        d.getElementById('r').innerHTML = pending.html;
+      } catch (err) { viaSrcdoc(); }
+    }
+    iframe.srcdoc = skeleton;
+    return {
+      set: function (data) {
+        pending = data;
+        if (fallback) viaSrcdoc();
+        else if (ready) apply();
+      }
+    };
+  }
+  const targetFrame = Frame($('#target-frame'));
+  const previewFrame = Frame($('#preview-frame'));
+
+  /* =====================================================================
+     STATE
+     ===================================================================== */
+  let stage, pieces = [], pieceMap = {}, els = {}, expectedHtml = [], stageRules = [];
+
+  function buildPiece(p) {
+    const el = document.createElement('div');
+    el.className = 'piece ' + p.type;
+    el.dataset.id = p.id;
+    el.innerHTML = '<span class="handle" aria-hidden="true">⋮⋮</span><code></code>' +
+      '<button class="pbtn" type="button"></button>';
+    el.querySelector('code').textContent = p.content;
+    return el;
+  }
+
+  function loadStage(key) {
+    stage = STAGES.filter(function (s) { return s.key === key; })[0] || STAGES[0];
+    $('#stage').value = stage.key;
+    $('#btn-mode').hidden = stage.key !== 'semua';
+    if (stage.key !== 'semua') setMode('standar');
+    $('#stage-desc').textContent = '· ' + stage.desc;
+    store('puzzle-portofolio-stage', stage.key);
+
+    const all = stage.key === 'semua';
+    const stageIndex = STAGES.indexOf(stage);
+    const blocks = [];
+    HTML_BLOCKS.forEach(function (b, i) { if (all || b.stage === stage.key) blocks.push({ idx: i, code: b.code }); });
+    stageRules = RULES.filter(function (r) { return all || r.stage === stage.key; });
+
+    pieces = []; pieceMap = {}; els = {}; expectedHtml = [];
+    blocks.forEach(function (b) {
+      const p = { id: 'h' + b.idx, type: 'html', content: b.code };
+      pieces.push(p); expectedHtml.push(p);
+    });
+    stageRules.forEach(function (r) {
+      r.lines.forEach(function (line, i) {
+        pieces.push({
+          id: r.id + ':' + i, type: 'css', content: line, rule: r.id,
+          role: i === 0 ? 'sel' : (i === r.lines.length - 1 ? 'end' : 'prop')
+        });
+      });
+    });
+    pieces.forEach(function (p) { pieceMap[p.id] = p; els[p.id] = buildPiece(p); });
+
+    // CSS bagian sebelumnya sudah "diberikan" (di luar puzzle) agar target tetap utuh
+    const given = all ? [] : RULES.filter(function (r) {
+      return STAGES.map(function (s) { return s.key; }).indexOf(r.stage) < stageIndex;
+    });
+    stage.base = RESET + given.map(function (r) { return r.lines.join('\n'); }).join('\n');
+    targetFrame.set({
+      base: stage.base,
+      css: stageRules.map(function (r) { return r.lines.join('\n'); }).join('\n'),
+      html: expectedHtml.map(function (p) { return p.content; }).join('\n')
+    });
+
+    // Pulihkan / acak
+    workZone.innerHTML = ''; srcZone.innerHTML = '';
+    let saved = null;
+    try { saved = JSON.parse(store('puzzle-portofolio-' + stage.key) || 'null'); } catch (e) { saved = null; }
+    const ok = saved && Array.isArray(saved.work) && Array.isArray(saved.src) &&
+      saved.work.concat(saved.src).length === pieces.length &&
+      saved.work.concat(saved.src).every(function (id) { return pieceMap[id]; });
+    if (ok) {
+      saved.work.forEach(function (id) { workZone.appendChild(els[id]); });
+      saved.src.forEach(function (id) { srcZone.appendChild(els[id]); });
+    } else {
+      shuffleToSource();
+    }
+    afterChange(true);
+  }
+
+  function shuffleToSource() {
+    workZone.innerHTML = ''; srcZone.innerHTML = '';
+    shuffle(pieces).forEach(function (p) { srcZone.appendChild(els[p.id]); });
+  }
+
+  function save() {
+    const ids = function (z) { return Array.prototype.map.call(z.querySelectorAll(':scope > .piece'), function (e) { return e.dataset.id; }); };
+    store('puzzle-portofolio-' + stage.key, JSON.stringify({ work: ids(workZone), src: ids(srcZone) }));
+  }
+
+  function clearMarks() { $$('.piece.ok, .piece.bad').forEach(function (e) { e.classList.remove('ok', 'bad'); }); }
+
+  let previewTimer = 0;
+  function afterChange(skipClear) {
+    if (!skipClear) clearMarks();
+    $$('.piece').forEach(function (el) {
+      const inWork = el.parentElement === workZone;
+      const b = el.querySelector('.pbtn');
+      b.textContent = inWork ? '×' : '+';
+      b.setAttribute('aria-label', inWork ? 'Kembalikan ke kumpulan potongan' : 'Pasang ke area susun');
+      b.title = inWork ? 'Kembalikan' : 'Pasang';
+    });
+    const placed = workZone.querySelectorAll(':scope > .piece').length;
+    const total = pieces.length;
+    $('#src-count').textContent = total - placed;
+    $('#work-count').textContent = placed;
+    $('#progress-text').textContent = placed + '/' + total;
+    $('#progress-fill').style.width = (total ? placed / total * 100 : 0) + '%';
+    $('#empty').style.display = placed ? 'none' : 'flex';
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(renderPreview, 90);
+    save();
+  }
+
+  function compile() {
+    let html = [], css = [];
+    workZone.querySelectorAll(':scope > .piece').forEach(function (el) {
+      const p = pieceMap[el.dataset.id];
+      (p.type === 'html' ? html : css).push(p.content);
+    });
+    return { html: html.join('\n'), css: css.join('\n') };
+  }
+
+  function renderPreview() {
+    const c = compile();
+    previewFrame.set({ base: stage.base, css: c.css, html: c.html });
+    const placed = workZone.querySelectorAll(':scope > .piece').length;
+    const total = pieces.length;
+    const open = (c.css.match(/\{/g) || []).length, close = (c.css.match(/\}/g) || []).length;
+    const badge = $('#status');
+    if (!placed) { badge.textContent = 'Kosong'; badge.className = 'badge'; }
+    else if (open !== close) { badge.textContent = 'Cek kurung { }'; badge.className = 'badge err'; }
+    else if (placed < total) { badge.textContent = 'Menyusun… ' + placed + '/' + total; badge.className = 'badge progressing'; }
+    else { badge.textContent = 'Lengkap — tekan Periksa'; badge.className = 'badge done'; }
+  }
+
+  /* =====================================================================
+     PEMERIKSA
+     ===================================================================== */
+  function lcsMarks(a, b) {
+    const n = a.length, m = b.length;
+    const dp = [];
+    for (let i = 0; i <= n; i++) dp.push(new Array(m + 1).fill(0));
+    for (let i = n - 1; i >= 0; i--)
+      for (let j = m - 1; j >= 0; j--)
+        dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const keep = new Array(n).fill(false);
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i] === b[j]) { keep[i] = true; i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+      else j++;
+    }
+    return keep;
+  }
+
+  function runCheck() {
+    clearMarks();
+    const work = $$('#work-zone > .piece');
+    const issues = [];
+
+    // --- HTML: urutan blok ---
+    const got = work.filter(function (e) { return pieceMap[e.dataset.id].type === 'html'; });
+    const keep = lcsMarks(
+      got.map(function (e) { return pieceMap[e.dataset.id].content.trim(); }),
+      expectedHtml.map(function (p) { return p.content.trim(); }));
+    let htmlOk = 0;
+    got.forEach(function (e, i) { if (keep[i]) { e.classList.add('ok'); htmlOk++; } else e.classList.add('bad'); });
+    if (got.length - htmlOk > 0) issues.push('HTML: ' + (got.length - htmlOk) + ' blok urutannya masih salah (ditandai merah).');
+    if (expectedHtml.length - got.length > 0) issues.push('HTML: ' + (expectedHtml.length - got.length) + ' blok belum dipasang.');
+
+    // --- CSS: baca susunan siswa sebagai aturan ---
+    const state = {};
+    stageRules.forEach(function (r) {
+      const left = {};
+      r.lines.slice(1, -1).forEach(function (l) { const t = l.trim(); left[t] = (left[t] || 0) + 1; });
+      state[r.selector] = { rule: r, left: left, started: false, closed: false, unclosed: false, wrong: 0 };
+    });
+    let cur = null, stray = 0;
+    work.forEach(function (el) {
+      const p = pieceMap[el.dataset.id];
+      if (p.type !== 'css') return;
+      const t = p.content.trim();
+      if (p.role === 'sel') {
+        if (cur && !cur.closed) cur.unclosed = true;
+        cur = state[t.replace(/\s*\{$/, '')];
+        cur.started = true;
+        el.classList.add('ok');
+      } else if (p.role === 'prop') {
+        if (!cur || cur.closed) { el.classList.add('bad'); stray++; }
+        else if (cur.left[t] > 0) { cur.left[t]--; el.classList.add('ok'); }
+        else { cur.wrong++; el.classList.add('bad'); }
+      } else {
+        if (cur && !cur.closed) { cur.closed = true; el.classList.add('ok'); }
+        else { el.classList.add('bad'); stray++; }
+      }
+    });
+
+    let rulesOk = 0;
+    const notPlaced = [];
+    stageRules.forEach(function (r) {
+      const s = state[r.selector];
+      const missing = Object.keys(s.left).reduce(function (n, k) { return n + s.left[k]; }, 0);
+      if (!s.started) { notPlaced.push(r.selector); return; }
+      const clean = s.closed && !s.unclosed && !s.wrong && !missing;
+      if (clean) { rulesOk++; return; }
+      if (!s.closed || s.unclosed) issues.push('CSS: aturan <code>' + esc(r.selector) + '</code> belum ditutup dengan <code>}</code>.');
+      if (missing) issues.push('CSS: aturan <code>' + esc(r.selector) + '</code> masih kurang ' + missing + ' properti.');
+      if (s.wrong) issues.push('CSS: aturan <code>' + esc(r.selector) + '</code> berisi ' + s.wrong + ' baris yang bukan miliknya.');
+    });
+    if (notPlaced.length) {
+      issues.push('CSS: ' + notPlaced.length + ' aturan belum dipasang' +
+        (notPlaced.length <= 4 ? ' (' + notPlaced.map(function (s) { return '<code>' + esc(s) + '</code>'; }).join(', ') + ')' : '') + '.');
+    }
+    if (stray) issues.push('CSS: ' + stray + ' baris berada di luar aturan (tidak ada selektor / sudah ditutup).');
+
+    const perfect = !issues.length && got.length === expectedHtml.length && rulesOk === stageRules.length;
+    const body =
+      '<div class="stat-row">' +
+        '<div class="stat"><b>' + htmlOk + '/' + expectedHtml.length + '</b>blok HTML benar</div>' +
+        '<div class="stat"><b>' + rulesOk + '/' + stageRules.length + '</b>aturan CSS benar</div>' +
+      '</div>' +
+      (perfect
+        ? '<p>Semua potongan sudah tersusun benar. Bandingkan hasilnya dengan Target, lalu coba perluas panelnya dan ubah lebar ke HP.</p>'
+        : '<p>Yang perlu diperbaiki:</p><ul>' + issues.slice(0, 8).map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul>' +
+          (issues.length > 8 ? '<p>…dan ' + (issues.length - 8) + ' catatan lainnya.</p>' : '') +
+          '<p>Potongan hijau sudah tepat, merah perlu dipindah.</p>');
+    openModal(perfect ? '🎉 Mantap, semuanya benar!' : 'Hasil pemeriksaan', body);
+  }
+
+  /* =====================================================================
+     MODAL
+     ===================================================================== */
+  const modal = $('#modal');
+  function openModal(title, html) { $('#modal-title').textContent = title; $('#modal-body').innerHTML = html; modal.hidden = false; }
+  function closeModal() { modal.hidden = true; }
+  $('#modal-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+
+  /* =====================================================================
+     DRAG & DROP (pointer events: mouse, sentuh, stylus)
+     ===================================================================== */
+  let drag = null, dropLine = null, lastPt = { x: 0, y: 0 }, rafId = 0;
+
+  document.addEventListener('pointerdown', function (e) {
+    const piece = e.target.closest && e.target.closest('.piece');
+    if (!piece || e.target.closest('.pbtn') || drag) return;
+    const handle = e.target.closest('.handle');
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType !== 'mouse' && !handle) return;   // di layar sentuh, seret lewat ikon ⋮⋮ (supaya daftar tetap bisa di-scroll)
+    const r = piece.getBoundingClientRect();
+    drag = { piece: piece, pid: e.pointerId, sx: e.clientX, sy: e.clientY,
+             ox: e.clientX - r.left, oy: e.clientY - r.top, w: r.width, active: false, zone: null, ghost: null };
+    if (handle && handle.setPointerCapture) { try { handle.setPointerCapture(e.pointerId); } catch (err) { /* abaikan */ } }
+  });
+
+  window.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 6) return;
+      startDrag();
+    }
+    e.preventDefault();
+    lastPt = { x: e.clientX, y: e.clientY };
+    moveGhost();
+    updateDrop();
+  }, { passive: false });
+
+  window.addEventListener('pointerup', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (drag.active) {
+      if (drag.zone && dropLine.parentNode === drag.zone) drag.zone.insertBefore(drag.piece, dropLine);
+      endDrag();
+      afterChange();
+    } else { drag = null; }
+  });
+  window.addEventListener('pointercancel', function (e) {
+    if (!drag || e.pointerId !== drag.pid) return;
+    if (drag.active) endDrag(); else drag = null;
+  });
+  window.addEventListener('blur', function () { if (drag && drag.active) endDrag(); else drag = null; });
+  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.handle')) e.preventDefault(); });
+
+  function startDrag() {
+    drag.active = true;
+    const g = drag.piece.cloneNode(true);
+    g.classList.remove('ok', 'bad');
+    g.classList.add('ghost');
+    g.style.width = drag.w + 'px';
+    document.body.appendChild(g);
+    drag.ghost = g;
+    drag.piece.classList.add('is-dragging');
+    document.body.classList.add('dragging-now');
+    dropLine = document.createElement('div');
+    dropLine.className = 'drop-line';
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(autoScroll);
+  }
+  function moveGhost() {
+    drag.ghost.style.left = (lastPt.x - drag.ox) + 'px';
+    drag.ghost.style.top = (lastPt.y - drag.oy) + 'px';
+  }
+  function getAfter(zone, y) {
+    const items = Array.prototype.filter.call(zone.children, function (c) {
+      return c.classList.contains('piece') && c !== drag.piece && c.offsetParent !== null;
+    });
+    for (let i = 0; i < items.length; i++) {
+      const r = items[i].getBoundingClientRect();
+      if (y < r.top + r.height / 2) return items[i];
+    }
+    return null;
+  }
+  function updateDrop() {
+    const el = document.elementFromPoint(lastPt.x, lastPt.y);
+    const zone = el && el.closest ? el.closest('.zone') : null;
+    $$('.zone-wrap').forEach(function (w) { w.classList.remove('over'); });
+    if (!zone) { dropLine.remove(); drag.zone = null; return; }
+    zone.parentNode.classList.add('over');
+    drag.zone = zone;
+    const after = getAfter(zone, lastPt.y);
+    if (dropLine.parentNode !== zone || dropLine.nextSibling !== after) {
+      if (after) zone.insertBefore(dropLine, after); else zone.appendChild(dropLine);
+    }
+  }
+  function autoScroll() {
+    if (!drag || !drag.active) return;
+    const z = drag.zone;
+    if (z) {
+      const r = z.getBoundingClientRect(), edge = 56;
+      let v = 0;
+      if (lastPt.y < r.top + edge) v = -Math.min(1, (r.top + edge - lastPt.y) / edge) * 16;
+      else if (lastPt.y > r.bottom - edge) v = Math.min(1, (lastPt.y - (r.bottom - edge)) / edge) * 16;
+      if (v) { z.scrollTop += v; updateDrop(); }
+    }
+    rafId = requestAnimationFrame(autoScroll);
+  }
+  function endDrag() {
+    cancelAnimationFrame(rafId);
+    if (drag.ghost) drag.ghost.remove();
+    if (dropLine) dropLine.remove();
+    drag.piece.classList.remove('is-dragging');
+    document.body.classList.remove('dragging-now');
+    $$('.zone-wrap').forEach(function (w) { w.classList.remove('over'); });
+    drag = null;
+  }
+
+  // Tombol + / ×  (alternatif tanpa menyeret, enak untuk HP)
+  document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('.pbtn');
+    if (!b) return;
+    const el = b.closest('.piece');
+    const toSrc = el.parentElement === workZone;
+    (toSrc ? srcZone : workZone).appendChild(el);
+    if (!toSrc) workZone.scrollTop = workZone.scrollHeight;
+    afterChange();
+  });
+
+  /* =====================================================================
+     KONTROL
+     ===================================================================== */
+  // Pilihan bagian
+  const stageSel = $('#stage');
+  STAGES.forEach(function (s) { const o = document.createElement('option'); o.value = s.key; o.textContent = s.label; stageSel.appendChild(o); });
+  stageSel.addEventListener('change', function () {
+    const key = stageSel.value, prev = stage.key;
+    if (key === 'semua') {
+      askMode({ onPick: function (m) { switchStage('semua', m); }, onCancel: function () { stageSel.value = prev; } });
+    } else switchStage(key);
+  });
+  // Pindah bagian: bila sudah ada potongan tersusun, beri peringatan karena jawaban akan direset
+  function switchStage(key, m) {
+    const placed = workZone.querySelectorAll(':scope > .piece').length;
+    const go = function () {
+      store('puzzle-portofolio-' + stage.key, '');          // hapus susunan bagian lama
+      loadStage(key);
+      if (key === 'semua') setMode(m);
+    };
+    if (!placed) { go(); return; }
+    askConfirm({
+      title: 'Pindah bagian?',
+      body: '<p>Kamu sudah menyusun <b>' + placed + ' potongan</b> di bagian ini.</p>' +
+            '<p>Kalau pindah, <b>semua jawaban akan direset</b> dan tidak bisa dikembalikan.</p>',
+      onOk: go,
+      onCancel: function () { stageSel.value = stage.key; }
+    });
+  }
+
+  // Saring potongan
+  $('#filter').addEventListener('click', function (e) {
+    const b = e.target.closest('button'); if (!b) return;
+    $$('#filter button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    srcZone.dataset.filter = b.dataset.f;
+  });
+
+  // Periksa
+  $('#btn-check').addEventListener('click', runCheck);
+
+  // Acak ulang (dua kali ketuk)
+  let resetTimer = 0;
+  const shuffleBtn = $('#btn-shuffle');
+  shuffleBtn.addEventListener('click', function () {
+    const placed = workZone.querySelectorAll(':scope > .piece').length;
+    if (placed && !shuffleBtn.dataset.sure) {
+      shuffleBtn.dataset.sure = '1';
+      shuffleBtn.textContent = 'Yakin? Ketuk lagi';
+      resetTimer = setTimeout(resetShuffleBtn, 2500);
+      return;
+    }
+    resetShuffleBtn();
+    shuffleToSource();
+    afterChange();
+  });
+  function resetShuffleBtn() { clearTimeout(resetTimer); delete shuffleBtn.dataset.sure; shuffleBtn.textContent = '🔀 Acak ulang'; }
+
+  // Mode guru: tambahkan ?guru ke alamat file untuk memunculkan tombol kunci jawaban
+  if (params.has('guru')) {
+    const solve = $('#btn-solve');
+    solve.hidden = false;
+    solve.addEventListener('click', function () {
+      expectedHtml.forEach(function (p) { workZone.appendChild(els[p.id]); });
+      stageRules.forEach(function (r) { r.lines.forEach(function (_, i) { workZone.appendChild(els[r.id + ':' + i]); }); });
+      afterChange();
+    });
+  }
+
+  // Tab HP
+  $$('.tabs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.body.dataset.view = b.dataset.view;
+      $$('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    });
+  });
+
+  // Perluas panel + lebar simulasi
+  $$('[data-expand]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const panel = document.getElementById(btn.dataset.expand);
+      const on = panel.classList.toggle('expanded');
+      btn.textContent = on ? '✕ Tutup' : '⤢ Perluas';
+      if (!on) {
+        const wrap = panel.querySelector('.frame-wrap');
+        wrap.dataset.w = 'auto';
+        panel.querySelectorAll('.wbtns button').forEach(function (x) { x.classList.toggle('on', x.dataset.w === 'auto'); });
+      }
+    });
+  });
+  $$('.wbtns').forEach(function (seg) {
+    seg.addEventListener('click', function (e) {
+      const b = e.target.closest('button'); if (!b) return;
+      document.getElementById(seg.dataset.for).dataset.w = b.dataset.w;
+      seg.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!confirmModal.hidden) { endConfirm(false); return; }
+    if (!modeModal.hidden) { cancelMode(); return; }
+    if (!modal.hidden) { closeModal(); return; }
+    const open = document.querySelector('.panel.expanded');
+    if (open) open.querySelector('[data-expand]').click();
+  });
+
+  /* =====================================================================
+     MODE STANDAR / HARD (jendela berpindah tempat tiap 1 menit)
+     ===================================================================== */
+  const PANEL_IDS = ['panel-src', 'panel-work', 'panel-target', 'panel-preview'];
+  const HARD_MS = 60000;
+  let mode = 'standar';
+  const hard = { timer: 0, next: 0, layout: 0, assign: [0, 1, 2, 3] };   // assign[i] = nomor sel layout untuk PANEL_IDS[i]
+  const modeModal = $('#mode-modal');
+  let modeCtx = null, toastTimer = 0;
+
+  function askMode(ctx) { modeCtx = ctx; modeModal.hidden = false; }
+  function cancelMode() {
+    const ctx = modeCtx; modeCtx = null; modeModal.hidden = true;
+    if (ctx && ctx.onCancel) ctx.onCancel();
+  }
+  $$('#mode-modal [data-mode]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      const ctx = modeCtx; modeCtx = null; modeModal.hidden = true;
+      if (ctx) ctx.onPick(b.dataset.mode);
+    });
+  });
+  $('#mode-cancel').addEventListener('click', cancelMode);
+  $('#btn-mode').addEventListener('click', function () { askMode({ onPick: setMode }); });
+
+  const confirmModal = $('#confirm-modal');
+  let confirmCtx = null;
+  function askConfirm(ctx) {
+    confirmCtx = ctx;
+    $('#confirm-title').textContent = ctx.title;
+    $('#confirm-body').innerHTML = ctx.body;
+    confirmModal.hidden = false;
+  }
+  function endConfirm(ok) {
+    const c = confirmCtx; confirmCtx = null; confirmModal.hidden = true;
+    if (!c) return;
+    if (ok) c.onOk(); else if (c.onCancel) c.onCancel();
+  }
+  $('#confirm-ok').addEventListener('click', function () { endConfirm(true); });
+  $('#confirm-cancel').addEventListener('click', function () { endConfirm(false); });
+
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+
+  // Katalog pola layout pada grid 24 kolom x 12 baris: sel = [kolom awal, lebar kolom, baris awal, tinggi baris]
+  const LAYOUTS = [
+    { name: 'Kuadran 2×2',                  cells: [[1,12,1,6],[13,12,1,6],[1,12,7,6],[13,12,7,6]] },
+    { name: 'Klasik: kanan 2 susun',        cells: [[1,8,1,12],[9,8,1,12],[17,8,1,6],[17,8,7,6]] },
+    { name: 'Kiri 2 susun',                 cells: [[1,8,1,6],[1,8,7,6],[9,8,1,12],[17,8,1,12]] },
+    { name: 'Tengah 2 susun',               cells: [[1,8,1,12],[9,8,1,6],[9,8,7,6],[17,8,1,12]] },
+    { name: 'Sisi lebar, tengah 2 susun',   cells: [[1,9,1,12],[10,6,1,6],[10,6,7,6],[16,9,1,12]] },
+    { name: 'Satu besar di kiri',           cells: [[1,13,1,12],[14,11,1,4],[14,11,5,4],[14,11,9,4]] },
+    { name: 'Satu besar di kanan',          cells: [[1,11,1,4],[1,11,5,4],[1,11,9,4],[12,13,1,12]] },
+    { name: 'Satu besar di atas',           cells: [[1,24,1,6],[1,8,7,6],[9,8,7,6],[17,8,7,6]] },
+    { name: 'Satu besar di bawah',          cells: [[1,8,1,6],[9,8,1,6],[17,8,1,6],[1,24,7,6]] },
+    { name: 'Empat kolom',                  cells: [[1,6,1,12],[7,6,1,12],[13,6,1,12],[19,6,1,12]] },
+    { name: 'Kincir angin',                 cells: [[1,16,1,7],[17,8,1,7],[1,8,8,5],[9,16,8,5]] },
+    { name: 'Tengah lebar, kanan 2 susun',  cells: [[1,6,1,12],[7,12,1,12],[19,6,1,6],[19,6,7,6]] },
+    { name: 'Tengah lebar, kiri 2 susun',   cells: [[1,6,1,6],[1,6,7,6],[7,12,1,12],[19,6,1,12]] },
+    { name: 'Atas: lebar lalu sempit',      cells: [[1,16,1,6],[17,8,1,6],[1,8,7,6],[9,16,7,6]] },
+    { name: 'Atas: sempit lalu lebar',      cells: [[1,8,1,6],[9,16,1,6],[1,16,7,6],[17,8,7,6]] }
+  ];
+  const geo = function (layout, cell) { return LAYOUTS[layout].cells[cell].join(','); };
+
+  // Pilih pola + penempatan baru: pola berbeda dan setiap jendela pasti pindah ke area yang berbeda
+  function pickNext(prev) {
+    for (let t = 0; t < 400; t++) {
+      const li = Math.floor(Math.random() * LAYOUTS.length);
+      if (prev && li === prev.layout) continue;
+      const assign = shuffle([0, 1, 2, 3]);
+      if (prev && assign.some(function (c, i) { return geo(li, c) === geo(prev.layout, prev.assign[i]); })) continue;
+      return { layout: li, assign: assign };
+    }
+    return { layout: (prev ? prev.layout + 1 : 0) % LAYOUTS.length, assign: shuffle([0, 1, 2, 3]) };
+  }
+
+  function applySlots(animate) {
+    const panels = PANEL_IDS.map(function (id) { return document.getElementById(id); });
+    const first = animate ? panels.map(function (p) { return p.getBoundingClientRect(); }) : null;
+    const cells = LAYOUTS[hard.layout].cells;
+    const reading = cells.map(function (_, i) { return i; }).sort(function (a, b) {   // urutan baca: atas→bawah, kiri→kanan
+      return cells[a][2] - cells[b][2] || cells[a][0] - cells[b][0];
+    });
+    const rank = []; reading.forEach(function (ci, r) { rank[ci] = r; });
+    const ord = panels.map(function (_, i) { return rank[hard.assign[i]]; });
+    panels.forEach(function (p, i) {
+      const c = cells[hard.assign[i]];
+      p.style.setProperty('--gc', c[0] + ' / span ' + c[1]);
+      p.style.setProperty('--gr', c[2] + ' / span ' + c[3]);
+      p.style.setProperty('--ord', ord[i]);
+    });
+    const tabRank = { puzzle: Math.min(ord[0], ord[1]), target: ord[2], preview: ord[3] };
+    $$('.tabs button').forEach(function (b) { b.style.order = tabRank[b.dataset.view]; });
+    if (!animate) return;
+    panels.forEach(function (p) {
+      const i = panels.indexOf(p), a = first[i], z = p.getBoundingClientRect();
+      if (!a.width || !z.width || p.classList.contains('expanded')) return;
+      const dx = a.left - z.left, dy = a.top - z.top, sx = a.width / z.width, sy = a.height / z.height;
+      p.style.zIndex = 20;
+      const frames = [
+        { transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
+        { transformOrigin: '0 0', transform: 'none' }
+      ];
+      const an = p.animate(frames, { duration: 800, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      an.onfinish = an.oncancel = function () { p.style.zIndex = ''; };
+    });
+  }
+
+  function tick() {
+    let left = hard.next - Date.now();
+    if (left <= 0) {
+      if (drag && drag.active) left = 0;           // jangan pindah saat siswa sedang menyeret
+      else {
+        const n = pickNext(hard);
+        hard.layout = n.layout; hard.assign = n.assign;
+        applySlots(true);
+        hard.next = Date.now() + HARD_MS;
+        left = HARD_MS;
+        toast('🔀 Jendela berpindah! · ' + LAYOUTS[hard.layout].name);
+      }
+    }
+    const sec = Math.ceil(left / 1000);
+    $('#hard-time').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    $('#hard-box').classList.toggle('warn', left <= 5000);
+    $('#hard-fill').style.width = (left / HARD_MS * 100) + '%';
+  }
+
+  function startHard() {
+    stopHard();
+    document.body.classList.add('hard');
+    const n = pickNext(null);
+    hard.layout = n.layout; hard.assign = n.assign;
+    applySlots(false);
+    hard.next = Date.now() + HARD_MS;
+    hard.timer = setInterval(tick, 250);
+    $('#hard-box').hidden = false;
+    tick();
+    toast('🔥 Mode Hard! Pola pertama: ' + LAYOUTS[hard.layout].name);
+  }
+  function stopHard() {
+    clearInterval(hard.timer); hard.timer = 0;
+    document.body.classList.remove('hard');
+    PANEL_IDS.forEach(function (id) {
+      const p = document.getElementById(id);
+      ['--gc', '--gr', '--ord'].forEach(function (v) { p.style.removeProperty(v); });
+      p.style.zIndex = '';
+    });
+    $$('.tabs button').forEach(function (b) { b.style.order = ''; });
+    $('#hard-box').hidden = true;
+  }
+  function setMode(m) {
+    mode = m;
+    $('#btn-mode').textContent = m === 'hard' ? '🔥 Mode: Hard' : '🧩 Mode: Standar';
+    if (m === 'hard') startHard(); else stopHard();
+  }
+
+  /* =====================================================================
+     MULAI
+     ===================================================================== */
+  const wanted = params.get('bagian') || store('puzzle-portofolio-stage') || 'navbar';
+  const wantedMode = params.get('mode');
+  if (wanted === 'semua') {
+    if (wantedMode === 'hard' || wantedMode === 'standar') { loadStage('semua'); setMode(wantedMode); }
+    else {
+      loadStage('navbar');
+      askMode({ onPick: function (m) { loadStage('semua'); setMode(m); }, onCancel: function () { } });
+    }
+  } else loadStage(wanted);
+})();
+</script>
+</body>
+</html>
