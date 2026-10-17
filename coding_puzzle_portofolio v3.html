@@ -35,25 +35,51 @@
   .app-header {
     flex: none;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 16px;
-    padding: 10px 14px;
+    gap: 10px 14px;
+    padding: 8px 14px;
     background: #0f172a;
     color: #fff;
   }
-  .brand h1 { margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-  .brand p { margin: 2px 0 0; font-size: 12px; color: #94a3b8; }
-  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .brand h1 { min-width:0; margin: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; white-space:nowrap; }
+  .stage-desc { display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fbbf24; }
+  .brand { flex:0 0 245px; min-width:215px; }
+  .brand p { display:flex; align-items:center; gap:6px; margin: 2px 0 0; font-size: 12px; color: #94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mobile-clock { display:none; margin-left:auto; padding:3px 7px; border:1px solid #475569; border-radius:8px; color:#fde68a; font:700 14px/1.2 ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+  .mobile-progress { display:none; padding:3px 6px; border-radius:8px; background:#1e293b; color:#cbd5e1; font-size:11px; font-variant-numeric:tabular-nums; }
+  .controls { display: flex; flex:1 1 auto; flex-wrap: nowrap; align-items: center; justify-content:flex-end; gap: 6px; min-width: 0; }
   .controls select {
-    max-width: 240px;
-    padding: 7px 10px;
+    max-width: 215px;
+    padding: 6px 8px;
     border-radius: 8px;
     border: 1px solid #334155;
     background: #1e293b;
     color: #fff;
   }
+  .profile-button { display:flex; flex:0 0 42px; width:42px; height:42px; align-items:center; justify-content:center; padding:3px; border:1px solid #334155; border-radius:50%; background:#1e293b; color:#fff; cursor:pointer; }
+  .stopwatch { display:flex; align-items:center; gap:6px; padding:7px 10px; border:1px solid #334155; border-radius:8px; background:#1e293b; color:#fde68a; font-variant-numeric:tabular-nums; }
+  .stopwatch[hidden] { display:none; }
+  .profile-button[hidden] { display:none; }
+  .profile-button { order: 20; }
+  #play-mode { order: 1; }
+  #focus { order: 2; }
+  #stage { order: 3; }
+  #btn-check { order: 4; }
+  #btn-shuffle { order: 5; }
+  #btn-solve, #btn-mode { order: 6; }
+  #stopwatch { order: 7; }
+  #hard-box { order: 8; }
+  .progress-box { order: 9; }
+  .profile-avatar { width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:#6366f1; color:#fff; font-size:13px; font-weight:800; }
+  .profile-label { display:none; }
+  .modal-card label { display:flex; flex-direction:column; gap:6px; margin-top:12px; color:#334155; font-size:13px; font-weight:600; }
+  .modal-card input { width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+  .report-table { width:100%; border-collapse:collapse; margin:12px 0; font-size:13px; }
+  .report-table th, .report-table td { padding:8px 9px; border:1px solid #cbd5e1; text-align:left; }
+  .report-table th { background:#eef2ff; }
+  .report-average { padding:10px; border-radius:8px; background:#f1f5f9; font-weight:700; }
   .btn {
     padding: 7px 12px;
     border: 0;
@@ -65,6 +91,7 @@
     color: #fff;
   }
   .btn:hover { background: #475569; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
   .btn.primary { background: var(--brand); }
   .btn.primary:hover { background: #4f46e5; }
   .btn.warn { background: #b45309; }
@@ -269,6 +296,9 @@
 
   /* ---------- Responsif ---------- */
   @media (max-width: 959px) {
+    .app-header { flex-wrap: wrap; gap: 6px 10px; }
+    .brand { flex:1 1 100%; width:100%; min-width:0; }
+    .controls { flex-wrap:wrap; }
     .tabs { display: flex; }
     .layout { grid-template-columns: minmax(0, 1fr); grid-auto-rows: minmax(0, 1fr); padding: 8px; gap: 8px; }
     .col-right { display: contents; }
@@ -282,21 +312,64 @@
     .brand h1 { font-size: 16px; }
     .stage-desc { display: none; }
   }
+  @media (min-width:960px) and (max-width:1550px) {
+    .brand { flex:0 0 190px; min-width:175px; }
+    .brand h1 { font-size:16px; }
+    .brand p { display:flex; font-size:10px; }
+    .controls { gap:3px; }
+    .controls select { max-width:145px; padding:5px 5px; font-size:12px; }
+    .progress { width:68px; }
+    .progress-box { gap:5px; font-size:11px; }
+    .btn { padding:5px 6px; font-size:11px; }
+    .stopwatch, .hard-box { padding:5px 6px; font-size:11px; }
+    .hard-box b { min-width:48px; font-size:12px; }
+  }
   @media (max-width: 959px) and (min-width: 600px) {
     .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     #panel-target, #panel-preview { grid-column: 1 / -1; }
   }
   @media (max-width: 599px) {
+    body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
     .brand p { display: none; }
+    .brand { min-width:0; }
+    .mobile-clock { display:inline-flex; }
+    .mobile-progress { display:inline-flex; }
     .progress { width: 70px; }
-    .controls select { max-width: 100%; flex: 1 1 100%; }
+    .controls { display:none; }
+    .mobile-dock { display:flex; }
+    .tabs { position:fixed; z-index:300; left:50%; bottom:calc(72px + env(safe-area-inset-bottom)); transform:translateX(-50%); width:min(290px,calc(100% - 32px)); padding:4px; border:1px solid rgba(255,255,255,.18); border-radius:18px; background:rgba(15,23,42,.82); backdrop-filter:blur(18px); box-shadow:0 8px 30px rgba(15,23,42,.24); }
+    .tabs button { padding:7px 4px; font-size:11px; border-radius:12px; }
     .btn { padding: 8px 10px; font-size: 13px; }
+  }
+  .mobile-dock { display:none; }
+  .mobile-dock button { display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:0; border:0; background:transparent; color:#475569; font:inherit; cursor:pointer; }
+  .mobile-dock button b { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#eef2ff; color:#4338ca; font-size:14px; }
+  .mobile-dock button span { font-size:10px; font-weight:700; }
+  .mobile-dock .profile-button { display:flex; order:initial; padding:0; border:0; background:transparent; }
+  .mobile-dock .profile-button[hidden] { display:none; }
+  .mobile-dock .profile-button .profile-avatar { width:36px; height:36px; }
+  .mobile-dock .profile-label { display:none; }
+  option.exam-complete { color:#15803d; font-weight:700; }
+  @media (max-width: 599px) {
+    .mobile-dock { position:fixed; z-index:400; left:12px; right:12px; bottom:calc(8px + env(safe-area-inset-bottom)); height:58px; display:flex; align-items:center; gap:3px; padding:5px 8px; border:1px solid rgba(255,255,255,.65); border-radius:22px; background:rgba(255,255,255,.86); backdrop-filter:blur(20px) saturate(1.5); box-shadow:0 8px 28px rgba(15,23,42,.2); }
+  }
+  #print-report { display:none; }
+  @media print {
+    @page { margin:18mm; }
+    body { display:block; height:auto; overflow:visible; background:#fff; color:#111827; }
+    body > *:not(#print-report) { display:none !important; }
+    #print-report { display:block; font:12pt/1.45 Arial,sans-serif; }
+    #print-report h1 { margin:0 0 8px; font-size:22pt; }
+    #print-report p { margin:5px 0; }
+    #print-report table { width:100%; border-collapse:collapse; margin-top:16px; }
+    #print-report th, #print-report td { border:1px solid #64748b; padding:8px; text-align:left; }
+    #print-report th { background:#e2e8f0 !important; print-color-adjust:exact; }
   }
 
   /* ---------- Mode Hard & pilihan mode ---------- */
   .hard-box { position: relative; overflow: hidden; display: flex; align-items: center; gap: 8px; padding: 6px 10px 8px; border-radius: 8px; background: #7c2d12; color: #ffedd5; font-size: 12px; font-weight: 600; }
   .hard-box[hidden] { display: none; }
-  .hard-box b { min-width: 34px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .hard-box b { min-width: 54px; font-size: 14px; font-variant-numeric: tabular-nums; }
   .hard-box .hbar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .15); }
   .hard-box .hbar i { display: block; height: 100%; width: 100%; background: #fb923c; }
   .hard-box.warn { background: #b91c1c; animation: pulse .6s infinite alternate; }
@@ -306,6 +379,9 @@
   .mode-card b { font-size: 17px; }
   .mode-card span { font-size: 13px; line-height: 1.4; color: #475569; }
   .mode-card:hover { border-color: var(--brand); background: #eef2ff; }
+  .mobile-choice-list { display:grid; gap:8px; margin-top:12px; }
+  .mobile-choice-list button { padding:11px 12px; text-align:left; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; font:inherit; cursor:pointer; }
+  .mobile-choice-list button:hover { border-color:#6366f1; background:#eef2ff; }
   .mode-card.hard { border-color: #fdba74; background: #fff7ed; }
   .mode-card.hard:hover { border-color: #ea580c; background: #ffedd5; }
   .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 600; padding: 9px 16px; border-radius: 99px; background: #0f172a; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
@@ -326,17 +402,21 @@
 
 <header class="app-header">
   <div class="brand">
-    <h1>🧩 Coding Puzzle <span class="stage-desc" id="stage-desc" style="font-weight:500;font-size:12px;color:#fbbf24"></span></h1>
-    <p>Susun website portofolio: Tipografi · Text Align · Text Decoration · Transform · Flexbox · Grid</p>
+    <h1>🧩 Coding Puzzle</h1>
+    <p><span class="stage-desc" id="stage-desc"></span><span id="theme-label">Masukkan nama, lalu pilih fokus dan level</span><span class="mobile-clock" id="mobile-clock" aria-live="off"></span><span class="mobile-progress" id="mobile-progress">0/0</span></p>
   </div>
   <div class="controls">
-    <select id="stage" aria-label="Pilih bagian puzzle"></select>
+    <select id="play-mode" aria-label="Pilih mode bermain"><option value="latihan">Mode: Latihan</option><option value="ujian">Mode: Ujian</option></select>
+    <select id="focus" aria-label="Pilih fokus pembelajaran"><option value="html">Fokus: HTML</option><option value="css">Fokus: CSS</option></select>
+    <select id="stage" aria-label="Pilih bagian puzzle"><option value="">Pilih level</option></select>
     <button class="btn primary" id="btn-check" type="button">✔ Periksa</button>
     <button class="btn" id="btn-shuffle" type="button">🔀 Acak ulang</button>
     <button class="btn warn" id="btn-solve" type="button" hidden>🔑 Kunci</button>
     <button class="btn" id="btn-mode" type="button" hidden></button>
-    <div class="hard-box" id="hard-box" hidden title="Jendela akan berpindah tempat"><span>🔥 Pindah dalam</span><b id="hard-time">1:00</b><span class="hbar"><i id="hard-fill"></i></span></div>
+    <div class="stopwatch" id="stopwatch" hidden aria-live="polite"><span>⏱</span><b id="stopwatch-time">00:00</b></div>
+    <div class="hard-box" id="hard-box" hidden title="Jendela akan berpindah tempat"><span>🔥 Pindah</span><b id="hard-time">1:00</b><span class="hbar"><i id="hard-fill"></i></span></div>
     <div class="progress-box"><div class="progress"><i id="progress-fill"></i></div><span id="progress-text">0/0</span></div>
+    <button class="profile-button" id="profile-button" type="button" hidden aria-label="Profil dan laporan nilai"><span class="profile-avatar" id="profile-avatar">?</span><span class="profile-label" id="profile-label"></span></button>
   </div>
 </header>
 
@@ -363,7 +443,7 @@
     <div class="panel-head">
       <div>
         <h2>📝 Area Susun <span class="count" id="work-count">0</span></h2>
-        <p class="hint">HTML urut dari atas ke bawah halaman, CSS per aturan. Urutan properti dalam satu aturan boleh bebas.</p>
+    <p class="hint" id="puzzle-hint">HTML menyertakan dokumen lengkap; susun dari atas ke bawah halaman.</p>
       </div>
     </div>
     <div class="zone-wrap" id="wrap-work">
@@ -416,6 +496,13 @@
   <button type="button" data-view="preview">👀 Hasil</button>
 </nav>
 
+<nav class="mobile-dock" aria-label="Pengaturan permainan">
+  <button type="button" data-picker="play-mode" aria-label="Pilih mode"><b>M</b><span>Mode</span></button>
+  <button type="button" data-picker="focus" aria-label="Pilih fokus"><b>F</b><span>Fokus</span></button>
+  <button type="button" data-picker="stage" aria-label="Pilih level"><b>L</b><span>Level</span></button>
+  <button class="profile-button" id="mobile-profile-button" type="button" aria-label="Profil dan laporan nilai"><span class="profile-avatar" id="mobile-profile-avatar">?</span><span class="profile-label">Profil</span></button>
+</nav>
+
 <div class="modal" id="modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <h3 id="modal-title"></h3>
@@ -423,6 +510,30 @@
     <div class="row"><button class="btn primary" type="button" id="modal-close">Tutup</button></div>
   </div>
 </div>
+
+<div class="modal" id="welcome-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <h3 id="welcome-title">Selamat datang di Coding Puzzle</h3>
+    <p>Masukkan nama lengkap untuk memulai. Nama dan nilai disimpan sementara di tab ini.</p>
+    <form id="welcome-form">
+      <label for="full-name">Nama lengkap</label>
+      <input id="full-name" name="name" type="text" autocomplete="name" maxlength="100" required placeholder="Contoh: Siti Nurhaliza">
+      <div class="row"><button class="btn primary" type="submit">Mulai belajar</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="profile-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+    <h3 id="profile-title">Laporan nilai</h3>
+    <div id="profile-report"></div>
+    <div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <button class="btn danger" id="profile-exit" type="button">Keluar dan hapus sesi</button>
+      <span><button class="btn" id="profile-close" type="button">Tutup</button> <button class="btn primary" id="profile-print" type="button">Cetak / Simpan PDF</button></span>
+    </div>
+  </div>
+</div>
+<div id="print-report"></div>
 
 <div class="modal" id="mode-modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mode-title">
@@ -468,6 +579,93 @@
     { key: 'penutup',   label: 'Bagian 6 — Testimoni & Footer',        desc: 'Text Align · Flexbox' },
     { key: 'semua',     label: 'Proyek Utuh — Semua bagian',           desc: 'Tantangan akhir' }
   ];
+
+  const THEMES = [
+    { name:'Majalah Editorial', layout:'editorial', brand:'Ruang Baca', intro:'Cerita, gagasan, dan sudut pandang baru dari penulis lintas bidang.', services:['Esai','Budaya','Wawancara'], projects:['Kota yang Berubah','Merawat Ingatan','Suara Generasi'], accent:'#be123c', dark:'#292524', light:'#fafaf9', soft:'#ffe4e6' },
+    { name:'Dashboard Admin', layout:'dashboard', brand:'PanelNiaga', intro:'Pantau penjualan, pesanan, dan pengalaman pelanggan dari satu tempat.', services:['Analitik','Inventaris','Laporan'], projects:['Penjualan Hari Ini','Produk Terlaris','Aktivitas Toko'], accent:'#2563eb', dark:'#172554', light:'#eff6ff', soft:'#dbeafe' },
+    { name:'Portofolio Kreator', layout:'portfolio', brand:'Alya Pratama', intro:'Desainer visual yang mengubah ide rumit menjadi pengalaman sederhana.', services:['Identitas Visual','Desain Produk','Ilustrasi'], projects:['Identitas Arunika','Aplikasi Teman','Poster Panggung'], accent:'#7c3aed', dark:'#2e1065', light:'#faf5ff', soft:'#ede9fe' },
+    { name:'Toko Online', layout:'catalog', brand:'Kebun Kecil', intro:'Pilih tanaman dan perlengkapan untuk membuat rumah terasa lebih hidup.', services:['Tanaman Hias','Pot Keramik','Paket Pemula'], projects:['Monstera Mini','Pot Tanah Liat','Paket Kebun'], accent:'#16a34a', dark:'#14532d', light:'#f0fdf4', soft:'#dcfce7' },
+    { name:'Acara & Konferensi', layout:'event', brand:'WebKarya 2026', intro:'Sehari berbagi ide, praktik, dan inspirasi seputar teknologi web.', services:['Sesi Utama','Lokakarya','Jejaring'], projects:['Membuat Web Aksesibel','CSS di Dunia Nyata','Masa Depan Browser'], accent:'#f97316', dark:'#431407', light:'#fff7ed', soft:'#ffedd5' },
+    { name:'Blog Resep', layout:'recipe', brand:'Dapur Rasa', intro:'Resep praktis rumahan dengan bahan sederhana dan langkah yang jelas.', services:['Menu Harian','Kue Rumahan','Tips Dapur'], projects:['Nasi Rempah','Pisang Panggang','Sup Hangat'], accent:'#dc2626', dark:'#451a03', light:'#fff7ed', soft:'#fee2e2' },
+    { name:'Kursus Online', layout:'course', brand:'Kelas Terbuka', intro:'Belajar keterampilan digital lewat materi terarah dan proyek nyata.', services:['HTML & CSS','JavaScript','Proyek Portofolio'], projects:['Membangun Halaman','Interaksi Web','Karya Akhir'], accent:'#4f46e5', dark:'#1e1b4b', light:'#eef2ff', soft:'#e0e7ff' },
+    { name:'Panduan Wisata', layout:'travel', brand:'Jalan-Jalan Yuk', intro:'Rencanakan liburan lokal dengan panduan tempat, rute, dan aktivitas.', services:['Destinasi','Itinerary','Pemandu Lokal'], projects:['Raja Ampat','Kota Yogyakarta','Dataran Tinggi Dieng'], accent:'#0891b2', dark:'#164e63', light:'#ecfeff', soft:'#cffafe' },
+    { name:'Komunitas Warga', layout:'community', brand:'Bumi Bersama', intro:'Tetangga bergerak bersama untuk lingkungan yang lebih bersih dan sehat.', services:['Aksi Bersih','Bank Sampah','Kebun Warga'], projects:['Pantai Bersih','Pilah Sampah','Kebun Bersama'], accent:'#059669', dark:'#064e3b', light:'#ecfdf5', soft:'#d1fae5' },
+    { name:'Klinik Kesehatan', layout:'health', brand:'Klinik Sehat', intro:'Layanan kesehatan keluarga yang mudah dijangkau dan dapat dipercaya.', services:['Konsultasi','Pemeriksaan','Apotek'], projects:['Dokter Umum','Kesehatan Anak','Pemeriksaan Rutin'], accent:'#0e7490', dark:'#164e63', light:'#ecfeff', soft:'#cffafe' },
+    { name:'Pesan & Komunitas (WhatsApp)', layout:'community', brand:'Sapa', intro:'Tetap terhubung lewat pesan pribadi, panggilan, grup, dan komunitas.', services:['Pesan pribadi','Panggilan suara & video','Komunitas dan Status'], projects:['Percakapan aman','Panggilan keluarga','Kabar komunitas'], accent:'#25d366', dark:'#075e54', light:'#f0fdf4', soft:'#dcfce7' },
+    { name:'Portal Berita (Google News)', layout:'editorial', brand:'Kabar Kini', intro:'Ikuti berita utama, teknologi, bisnis, dan kabar dari berbagai sumber.', services:['Berita utama','Teknologi','Bisnis'], projects:['Kabar hari ini','Inovasi digital','Pasar dan ekonomi'], accent:'#4285f4', dark:'#174ea6', light:'#f8fafd', soft:'#e8f0fe' },
+    { name:'Pemesanan Penginapan (Airbnb)', layout:'travel', brand:'Ruang Singgah', intro:'Temukan penginapan dan pengalaman lokal untuk perjalanan berikutnya.', services:['Rumah unik','Pengalaman lokal','Tempat alam'], projects:['Vila tepi pantai','Rumah di kota lama','Kabin pegunungan'], accent:'#ff385c', dark:'#5b1021', light:'#fff7f8', soft:'#ffe4e8' }
+  ];
+  let focus = 'html', theme = THEMES[0];
+
+  function themedBlocks(t) {
+    const cards = t.services.map(function (label, i) {
+      const notes = {
+        editorial:['Esai pilihan dari redaksi.','Kisah seni, kota, dan keseharian.','Percakapan dengan para pemikir.'],
+        dashboard:['Lihat tren penjualan terbaru.','Atur stok dan katalog barang.','Unduh laporan performa toko.'],
+        portfolio:['Sistem visual yang khas.','Alur produk yang mudah dipakai.','Ilustrasi untuk kampanye kreatif.'],
+        catalog:['Pilihan segar untuk rumah.','Dibuat oleh perajin lokal.','Semua kebutuhan dalam satu paket.'],
+        event:['Pembicara dan sesi utama.','Belajar langsung lewat praktik.','Bertemu komunitas web.'],
+        recipe:['Masakan cepat untuk keluarga.','Kudapan untuk waktu santai.','Teknik sederhana agar hasil pas.'],
+        course:['Pahami struktur dan tampilan.','Bangun interaksi halaman.','Terapkan ilmu menjadi karya.'],
+        travel:['Pilih tempat untuk dijelajahi.','Rute perjalanan yang nyaman.','Pengalaman bersama warga lokal.'],
+        community:['Ikut menjaga ruang bersama.','Kurangi sampah dari rumah.','Rawat pangan di lingkungan.'],
+        health:['Bertemu dokter sesuai kebutuhan.','Cek kesehatan secara berkala.','Ambil obat dengan arahan ahli.'],
+        agency:['Strategi merek dan komunikasi.','Produk digital yang berguna.','Bahasa visual untuk bisnis.']
+      }[t.layout] || ['Pelajari pilihan yang tersedia.','Temukan informasi lebih lanjut.','Mulai langkah berikutnya.'];
+      return '<article class="kartu"><span class="ikon">' + String(i + 1).padStart(2, '0') + '</span><h3>' + label + '</h3><p>' + notes[i] + '</p></article>';
+    });
+    const projects = t.projects.map(function (name, i) {
+      const description = t.layout === 'catalog' ? 'Rp ' + ['89.000','125.000','149.000'][i] :
+        t.layout === 'travel' ? ['Alam dan bahari','Seni dan kuliner','Jelajah pegunungan'][i] :
+        t.layout === 'editorial' ? ['Esai · 6 menit membaca','Budaya · 4 menit membaca','Opini · 8 menit membaca'][i] :
+        t.layout === 'portfolio' ? ['Identitas visual','Desain produk','Kampanye kreatif'][i] :
+        t.layout === 'event' ? ['Sesi utama','Lokakarya','Diskusi panel'][i] :
+        t.layout === 'recipe' ? ['25 menit · mudah','40 menit · sedang','15 menit · mudah'][i] :
+        t.layout === 'course' ? ['Pemula','Menengah','Proyek akhir'][i] :
+        t.layout === 'community' ? ['Kegiatan warga','Program rutin','Aksi bersama'][i] :
+        t.layout === 'health' ? ['Dokter umum','Dokter anak','Pemeriksaan rutin'][i] :
+        ['Pilihan terbaru','Cerita pelanggan','Karya unggulan'][i];
+      return '<figure class="proyek"><div class="gambar warna-' + (i + 1) + '"></div><figcaption><h3>' + name + '</h3><p>' + description + '</p></figcaption></figure>';
+    });
+    const heroLabels = { editorial:'Cerita utama', dashboard:'Ringkasan bisnis', portfolio:'Kreator independen', catalog:'Pilihan minggu ini', event:'Simpan tanggalnya', recipe:'Resep unggulan', course:'Belajar dengan proyek', travel:'Temukan perjalanan', community:'Gerakan warga', health:'Perawatan keluarga', agency:'Studio kreatif' };
+    const heroAction = { editorial:'Baca cerita', dashboard:'Lihat laporan', portfolio:'Lihat proyek', catalog:'Jelajahi katalog', event:'Daftar sekarang', recipe:'Lihat resep', course:'Mulai belajar', travel:'Jelajahi tempat', community:'Gabung bergerak', health:'Buat janji', agency:'Lihat karya' };
+    const hero = '<section class="hero"><span class="lencana">' + heroLabels[t.layout] + '</span><h1 class="judul">' + (t.layout === 'editorial' || t.layout === 'recipe' || t.layout === 'event' ? t.projects[0] : t.brand) + '</h1><p class="intro">' + t.intro + '</p><div class="aksi"><a href="#layanan" class="tombol utama">' + heroAction[t.layout] + '</a>' + (t.layout === 'portfolio' || t.layout === 'agency' ? '<a href="#kontak" class="tombol garis">Hubungi kami</a>' : '') + '</div></section>';
+    const stats = '<section class="statistik"><div class="angka"><strong>' + (t.layout === 'event' ? '12 Okt' : t.layout === 'recipe' ? '25 mnt' : t.layout === 'health' ? '24/7' : '120+') + '</strong><span>' + (t.layout === 'event' ? 'Tanggal acara' : t.layout === 'recipe' ? 'Waktu memasak' : t.layout === 'health' ? 'Layanan' : 'Cerita selesai') + '</span></div><div class="angka"><strong>' + (t.layout === 'course' ? '8 modul' : t.layout === 'travel' ? '24 tempat' : '45') + '</strong><span>' + (t.layout === 'course' ? 'Materi belajar' : t.layout === 'travel' ? 'Destinasi' : 'Pelanggan aktif') + '</span></div><div class="angka"><strong>' + (t.layout === 'event' ? '300' : t.layout === 'recipe' ? 'Mudah' : '4.9/5') + '</strong><span>' + (t.layout === 'event' ? 'Kursi tersedia' : t.layout === 'recipe' ? 'Tingkat resep' : 'Ulasan baik') + '</span></div></section>';
+    const serviceTitle = { editorial:'Rubrik majalah', dashboard:'Kelola toko', portfolio:'Keahlian', catalog:'Belanja berdasarkan kategori', event:'Rangkaian acara', recipe:'Bahan dan persiapan', course:'Jalur belajar', travel:'Rencana perjalanan', community:'Program komunitas', health:'Layanan kesehatan', agency:'Yang kami kerjakan' };
+    const projectTitle = { editorial:'Tulisan terbaru', dashboard:'Aktivitas terbaru', portfolio:'Proyek pilihan', catalog:'Produk populer', event:'Sesi pilihan', recipe:'Resep lainnya', course:'Kelas populer', travel:'Destinasi pilihan', community:'Aksi terbaru', health:'Panduan kesehatan', agency:'Karya pilihan' };
+    const service = '<section class="layanan" id="layanan"><h2 class="judul-bagian">' + serviceTitle[t.layout] + '</h2><p class="sub-bagian">' + t.intro + '</p><div class="grid-layanan">' + cards.join('') + '</div></section>';
+    const work = '<section class="karya" id="karya"><h2 class="judul-bagian">' + projectTitle[t.layout] + '</h2><div class="grid-karya">' + projects.join('') + '</div></section>';
+    const testimonial = '<section class="testimoni"><blockquote class="kutipan">“' + (t.layout === 'editorial' ? 'Selalu ada sudut pandang baru untuk dibawa pulang.' : t.layout === 'community' ? 'Perubahan lingkungan dimulai dari langkah kecil bersama.' : t.intro) + '”</blockquote><p class="penulis">— ' + (t.layout === 'editorial' ? 'Pembaca Ruang Baca' : t.layout === 'community' ? 'Koordinator komunitas' : 'Cerita dari pelanggan') + '</p></section>';
+    const footer = '<footer class="footer" id="kontak"><p class="footer-judul">' + (t.layout === 'event' ? 'Sampai bertemu di acara!' : t.layout === 'community' ? 'Mari mulai dari lingkungan kita.' : 'Ada yang ingin ditanyakan?') + '</p><a href="#" class="tombol utama">' + (t.layout === 'event' ? 'Hubungi panitia' : 'Hubungi ' + t.brand) + '</a><small>© 2026 ' + t.brand + '</small></footer>';
+    let result = [
+      { stage:'navbar', code:'<header class="navbar"><a href="#" class="logo">' + t.brand + '</a><nav class="menu"><a href="#layanan">' + serviceTitle[t.layout] + '</a><a href="#karya">' + projectTitle[t.layout] + '</a><a href="#kontak">Kontak</a></nav></header>' },
+      { stage:'hero', code:hero },
+      { stage:'statistik', code:stats },
+      { stage:'layanan', code:service },
+      { stage:'karya', code:work },
+      { stage:'penutup', code:testimonial },
+      { stage:'penutup', code:footer }
+    ];
+    if (t.layout === 'dashboard' || t.layout === 'editorial' || t.layout === 'community') result = [result[0], result[2], result[1], result[3], result[4], result[5], result[6]];
+    return result.map(function (b) {
+      return { stage:b.stage, code:b.code.replace(/#f59e0b/g, t.accent).replace(/#0f172a/g, t.dark).replace(/#f8fafc/g, t.light).replace(/#fef3c7/g, t.soft) };
+    });
+  }
+
+  function documentBlocks(blocks, t, scope) {
+    return [
+      { id:scope + ':doctype', content:'<!DOCTYPE html>' },
+      { id:scope + ':html-open', content:'<html lang="id">' },
+      { id:scope + ':head-open', content:'<head>' },
+      { id:scope + ':charset', content:'  <meta charset="UTF-8">' },
+      { id:scope + ':viewport', content:'  <meta name="viewport" content="width=device-width, initial-scale=1">' },
+      { id:scope + ':title-open', content:'  <title>' + t.name + ' — ' + t.brand + '</title>' },
+      { id:scope + ':head-close', content:'</head>' },
+      { id:scope + ':body-open', content:'<body>' }
+    ].concat(blocks.map(function (b, i) { return { id:scope + ':content:' + i, content:b.code }; }), [
+      { id:scope + ':body-close', content:'</body>' }, { id:scope + ':html-close', content:'</html>' }
+    ]);
+  }
 
   const HTML_BLOCKS = [
     { stage: 'navbar', code:
@@ -797,6 +995,20 @@
       'color: #94a3b8;'])
   ];
 
+  function rulesForTheme(t) {
+    const replacements = [
+      ['#f59e0b',t.accent], ['#0f172a',t.dark], ['#f8fafc',t.light], ['#fef3c7',t.soft],
+      ['Nusa\.digital',t.brand], ['1e293b',t.dark], ['cbd5e1',t.soft], ['64748b',t.dark]
+    ];
+    return RULES.map(function (r) {
+      const lines = r.lines.map(function (line) {
+        replacements.forEach(function (pair) { line = line.replace(new RegExp(pair[0], 'g'), pair[1]); });
+        return line;
+      });
+      return { id:r.id, stage:r.stage, selector:r.selector, lines:lines };
+    });
+  }
+
   /* =====================================================================
      UTIL
      ===================================================================== */
@@ -806,7 +1018,26 @@
   const workZone = $('#work-zone');
   const params = (function () { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(''); } })();
 
-  function store(key, val) { try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; } }
+  const volatileStore = {};
+  function store(key, val) {
+    try {
+      if (val === undefined) {
+        const saved = sessionStorage.getItem(key);
+        return saved === null ? (volatileStore[key] || null) : saved;
+      }
+      volatileStore[key] = String(val);
+      sessionStorage.setItem(key, val);
+      return val;
+    } catch (e) {
+      if (val === undefined) return volatileStore[key] || null;
+      volatileStore[key] = String(val);
+      return val;
+    }
+  }
+  function removeStore(key) {
+    delete volatileStore[key];
+    try { sessionStorage.removeItem(key); } catch (e) { /* penyimpanan sesi mungkin tidak tersedia */ }
+  }
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -859,7 +1090,41 @@
   /* =====================================================================
      STATE
      ===================================================================== */
-  let stage, pieces = [], pieceMap = {}, els = {}, expectedHtml = [], stageRules = [];
+  let stage = null, pieces = [], pieceMap = {}, els = {}, expectedHtml = [], stageRules = [], activeBlocks = [], activeRules = [];
+  let userName = '', results = [], playMode = 'latihan', examSwitchCount = 0, examLocked = false, levelTimer = { startedAt:0, stoppedAt:0, elapsed:0 }, levelRecorded = false, recordedScore = null, stopwatchInterval = 0;
+
+  function formatStopwatch(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    const h = Math.floor(total / 3600), m = Math.floor(total % 3600 / 60), s = total % 60;
+    return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') : String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+  function updateStopwatch() {
+    const visible = playMode === 'ujian' && !!stage;
+    const showHardTimer = !!stage && stage.key === 'semua' && mode === 'hard' && !!hard.timer;
+    $('#stopwatch').hidden = !visible;
+    $('#hard-box').hidden = !showHardTimer;
+    if (visible) {
+      const elapsed = levelTimer.startedAt ? Math.floor(((levelTimer.stoppedAt || Date.now()) - levelTimer.startedAt) / 1000) : 0;
+      $('#stopwatch-time').textContent = formatStopwatch(levelTimer.elapsed || elapsed);
+    }
+    updateMobileClock();
+    if (!visible) return;
+  }
+  function updateMobileClock() {
+    const parts = [];
+    if (stage && stage.key === 'semua' && mode === 'hard' && !$('#hard-box').hidden) parts.push('🔥 ' + $('#hard-time').textContent);
+    if (playMode === 'ujian' && stage) {
+      const elapsed = levelTimer.startedAt ? Math.floor(((levelTimer.stoppedAt || Date.now()) - levelTimer.startedAt) / 1000) : 0;
+      parts.push('⏱ ' + formatStopwatch(levelTimer.elapsed || elapsed));
+    }
+    $('#mobile-clock').textContent = parts.join(' · ');
+  }
+  function resetLevelClock() {
+    clearInterval(stopwatchInterval); stopwatchInterval = 0;
+    levelTimer = { startedAt:0, stoppedAt:0, elapsed:0 };
+    levelRecorded = false; recordedScore = null;
+    updateStopwatch();
+  }
 
   function buildPiece(p) {
     const el = document.createElement('div');
@@ -874,47 +1139,64 @@
   function loadStage(key) {
     stage = STAGES.filter(function (s) { return s.key === key; })[0] || STAGES[0];
     $('#stage').value = stage.key;
+    $('#btn-check').disabled = false;
+    $('#btn-shuffle').disabled = false;
+    resetLevelClock();
     $('#btn-mode').hidden = stage.key !== 'semua';
     if (stage.key !== 'semua') setMode('standar');
+    else if (focus === 'html' && mode === 'hard') startHard();
     $('#stage-desc').textContent = '· ' + stage.desc;
     store('puzzle-portofolio-stage', stage.key);
 
     const all = stage.key === 'semua';
     const stageIndex = STAGES.indexOf(stage);
+    activeBlocks = themedBlocks(theme);
+    activeRules = rulesForTheme(theme);
     const blocks = [];
-    HTML_BLOCKS.forEach(function (b, i) { if (all || b.stage === stage.key) blocks.push({ idx: i, code: b.code }); });
-    stageRules = RULES.filter(function (r) { return all || r.stage === stage.key; });
+    activeBlocks.forEach(function (b, i) { if (all || b.stage === stage.key) blocks.push({ idx: i, code: b.code }); });
+    stageRules = activeRules.filter(function (r) { return all || r.stage === stage.key; });
 
     pieces = []; pieceMap = {}; els = {}; expectedHtml = [];
-    blocks.forEach(function (b) {
-      const p = { id: 'h' + b.idx, type: 'html', content: b.code };
-      pieces.push(p); expectedHtml.push(p);
-    });
-    stageRules.forEach(function (r) {
-      r.lines.forEach(function (line, i) {
-        pieces.push({
-          id: r.id + ':' + i, type: 'css', content: line, rule: r.id,
-          role: i === 0 ? 'sel' : (i === r.lines.length - 1 ? 'end' : 'prop')
+    if (focus === 'html' || (focus === 'css' && all)) {
+      const source = all ? activeBlocks : blocks.map(function (b) { return activeBlocks[b.idx]; });
+      documentBlocks(source, theme, stage.key).forEach(function (part) { const p = { id:part.id, type:'html', content:part.content }; pieces.push(p); expectedHtml.push(p); });
+    }
+    if (focus === 'css') {
+      stageRules.forEach(function (r) {
+        r.lines.forEach(function (line, i) {
+          pieces.push({ id:r.id + ':' + i, type:'css', content:line, rule:r.id,
+            role:i === 0 ? 'sel' : (i === r.lines.length - 1 ? 'end' : 'prop') });
         });
       });
-    });
+    }
     pieces.forEach(function (p) { pieceMap[p.id] = p; els[p.id] = buildPiece(p); });
 
     // CSS bagian sebelumnya sudah "diberikan" (di luar puzzle) agar target tetap utuh
-    const given = all ? [] : RULES.filter(function (r) {
+    const given = all ? [] : activeRules.filter(function (r) {
       return STAGES.map(function (s) { return s.key; }).indexOf(r.stage) < stageIndex;
     });
     stage.base = RESET + given.map(function (r) { return r.lines.join('\n'); }).join('\n');
+    if (focus === 'html') stage.base = '';
     targetFrame.set({
       base: stage.base,
-      css: stageRules.map(function (r) { return r.lines.join('\n'); }).join('\n'),
-      html: expectedHtml.map(function (p) { return p.content; }).join('\n')
+      css: focus === 'html' ? activeRules.map(function (r) { return r.lines.join('\n'); }).join('\n') : stageRules.map(function (r) { return r.lines.join('\n'); }).join('\n'),
+      html: focus === 'html' || (focus === 'css' && all)
+        ? documentBlocks(all ? activeBlocks : blocks.map(function (b) { return activeBlocks[b.idx]; }), theme, stage.key).map(function (p) { return p.content; }).join('\n')
+        : blocks.map(function (b) { return b.code; }).join('\n')
     });
+    $('#stage-desc').textContent = focus === 'html' ? 'HTML lengkap' : stage.desc;
+    $('#theme-label').textContent = 'Tema acak: ' + theme.name + ' · ' + (focus === 'html' ? 'Fokus HTML' : 'Fokus CSS');
+    $('#puzzle-hint').textContent = (playMode === 'ujian' ? '⚠️ Stopwatch mulai saat pointer bergerak di area potongan atau susunan. ' : 'Mode latihan tanpa stopwatch. ') +
+      (focus === 'html' ? 'Susun dokumen dari <!DOCTYPE html> hingga </html>, termasuk <head> dan <body>.' : (all ? 'Susun HTML per komponen logis dan CSS baris per baris.' : 'Susun aturan CSS untuk bagian ini. Urutan properti dalam satu aturan boleh bebas.'));
 
     // Pulihkan / acak
     workZone.innerHTML = ''; srcZone.innerHTML = '';
     let saved = null;
-    try { saved = JSON.parse(store('puzzle-portofolio-' + stage.key) || 'null'); } catch (e) { saved = null; }
+    try {
+      const savedText = store('puzzle-portofolio-' + focus + '-' + stage.key) ||
+        (focus === 'css' ? store('puzzle-portofolio-' + stage.key) : null);
+      saved = JSON.parse(savedText || 'null');
+    } catch (e) { saved = null; }
     const ok = saved && Array.isArray(saved.work) && Array.isArray(saved.src) &&
       saved.work.concat(saved.src).length === pieces.length &&
       saved.work.concat(saved.src).every(function (id) { return pieceMap[id]; });
@@ -927,6 +1209,24 @@
     afterChange(true);
   }
 
+  function clearStage() {
+    stage = null;
+    pieces = []; pieceMap = {}; els = {}; expectedHtml = []; stageRules = [];
+    workZone.innerHTML = ''; srcZone.innerHTML = '';
+    $('#src-count').textContent = '0'; $('#work-count').textContent = '0';
+    $('#progress-text').textContent = '0/0'; $('#progress-fill').style.width = '0%'; $('#mobile-progress').textContent = '0/0';
+    $('#empty').style.display = 'flex';
+    $('#stage').value = '';
+    resetLevelClock();
+    $('#btn-check').disabled = true; $('#btn-shuffle').disabled = true;
+    $('#stage-desc').textContent = '';
+    $('#theme-label').textContent = 'Pilih fokus dan level untuk memulai';
+    $('#puzzle-hint').textContent = 'Pilih fokus dan level untuk memulai.';
+    $('#status').textContent = 'Pilih level'; $('#status').className = 'badge';
+    targetFrame.set({ base:'', css:'', html:'' });
+    previewFrame.set({ base:'', css:'', html:'' });
+  }
+
   function shuffleToSource() {
     workZone.innerHTML = ''; srcZone.innerHTML = '';
     shuffle(pieces).forEach(function (p) { srcZone.appendChild(els[p.id]); });
@@ -934,7 +1234,7 @@
 
   function save() {
     const ids = function (z) { return Array.prototype.map.call(z.querySelectorAll(':scope > .piece'), function (e) { return e.dataset.id; }); };
-    store('puzzle-portofolio-' + stage.key, JSON.stringify({ work: ids(workZone), src: ids(srcZone) }));
+    store('puzzle-portofolio-' + focus + '-' + stage.key, JSON.stringify({ work: ids(workZone), src: ids(srcZone) }));
   }
 
   function clearMarks() { $$('.piece.ok, .piece.bad').forEach(function (e) { e.classList.remove('ok', 'bad'); }); }
@@ -954,11 +1254,82 @@
     $('#src-count').textContent = total - placed;
     $('#work-count').textContent = placed;
     $('#progress-text').textContent = placed + '/' + total;
+    $('#mobile-progress').textContent = placed + '/' + total;
     $('#progress-fill').style.width = (total ? placed / total * 100 : 0) + '%';
     $('#empty').style.display = placed ? 'none' : 'flex';
     clearTimeout(previewTimer);
     previewTimer = setTimeout(renderPreview, 90);
     save();
+  }
+
+  window.addEventListener('pointermove', function (e) {
+    if (playMode !== 'ujian' || !userName || !stage || !pieces.length || levelTimer.startedAt) return;
+    if (!e.target.closest || !e.target.closest('#src-zone, #work-zone')) return;
+    levelTimer.startedAt = Date.now();
+    $('#puzzle-hint').textContent = '⏱ Stopwatch berjalan. Susun potongan dengan benar, lalu periksa jawaban.';
+    updateStopwatch();
+    stopwatchInterval = setInterval(updateStopwatch, 250);
+  }, { passive:true });
+
+  function formatDuration(seconds) {
+    const value = Math.max(0, Number(seconds) || 0);
+    const minutes = Math.floor(value / 60), remainder = value % 60;
+    return minutes + ' menit ' + remainder + ' detik';
+  }
+
+  function recordScore() {
+    if (!userName || !stage) return null;
+    if (levelRecorded) return recordedScore;
+    const elapsed = playMode === 'ujian' && levelTimer.startedAt ? Math.max(1, Math.ceil((Date.now() - levelTimer.startedAt) / 1000)) : null;
+    const targetSeconds = Math.max(60, pieces.length * 15);
+    const score = playMode === 'ujian' ? (elapsed ? Math.max(0, Math.min(100, Math.round(100 * targetSeconds / Math.max(targetSeconds, elapsed)))) : 100) : null;
+    if (playMode === 'ujian' && levelTimer.startedAt) {
+      levelTimer.stoppedAt = Date.now(); levelTimer.elapsed = elapsed;
+      clearInterval(stopwatchInterval); stopwatchInterval = 0; updateStopwatch();
+    }
+    recordedScore = { name:userName, focus:focus.toUpperCase(), mode:playMode === 'ujian' ? 'Ujian' : 'Latihan', level:stage.label, stageKey:stage.key, score:score, seconds:elapsed };
+    results.push(recordedScore);
+    store('puzzle-portofolio-results', JSON.stringify(results));
+    updateStageMenu();
+    levelRecorded = true;
+    return recordedScore;
+  }
+
+  function reportMarkup() {
+    const rows = results.map(function (r) {
+      return '<tr><td>' + esc(r.name) + '</td><td>' + esc(r.focus) + '</td><td>' + esc(r.mode || 'Ujian') + '</td><td>' + esc(r.level) + '</td><td>' + (r.score === null || r.score === undefined ? '—' : Number(r.score) + '/100') + '</td><td>' + (r.seconds === null || r.seconds === undefined ? '—' : formatStopwatch(r.seconds)) + '</td></tr>';
+    }).join('');
+    const exams = results.filter(function (r) { return r.score !== null && r.score !== undefined && r.mode !== 'Latihan'; });
+    const average = exams.length ? Math.round(exams.reduce(function (sum, r) { return sum + Number(r.score); }, 0) / exams.length) : null;
+    return '<p><b>Nama:</b> ' + esc(userName) + '</p><p>Skor ujian tertinggi 100. Patokan waktu: 15 detik per potongan (minimal 1 menit); skor turun setelah melewati patokan. Latihan dicatat tanpa skor.</p>' +
+      '<table class="report-table"><thead><tr><th>Nama</th><th>Fokus</th><th>Mode</th><th>Level</th><th>Skor</th><th>Waktu</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="6">Belum ada level yang diselesaikan.</td></tr>') + '</tbody></table>' +
+      '<p class="report-average">Rata-rata skor ujian: ' + (average === null ? '—' : average + '/100') + ' · ' + exams.length + ' level ujian (' + results.length + ' penyelesaian total)</p>';
+  }
+
+  function renderReport() {
+    $('#profile-report').innerHTML = reportMarkup();
+    $('#print-report').innerHTML = '<h1>Laporan Nilai Coding Puzzle</h1><p><b>Nama:</b> ' + esc(userName) + '</p><p><b>Tanggal cetak:</b> ' + new Date().toLocaleDateString('id-ID', { dateStyle:'long' }) + '</p>' +
+      reportMarkup().replace('<p><b>Nama:</b> ' + esc(userName) + '</p>', '');
+  }
+
+  function setProfile(name) {
+    userName = name;
+    $('#profile-label').textContent = name;
+    $('#profile-avatar').textContent = name.split(/\s+/).slice(0, 2).map(function (part) { return part.charAt(0).toUpperCase(); }).join('');
+    $('#mobile-profile-avatar').textContent = $('#profile-avatar').textContent;
+    $('#profile-button').hidden = false;
+    $('#mobile-profile-button').hidden = false;
+  }
+
+  function clearAppSession() {
+    try {
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const key = sessionStorage.key(i);
+        if (key && key.indexOf('puzzle-portofolio-') === 0) sessionStorage.removeItem(key);
+      }
+    } catch (e) { /* gunakan penyimpanan sementara di memori jika storage browser diblokir */ }
+    Object.keys(volatileStore).forEach(function (key) { delete volatileStore[key]; });
   }
 
   function compile() {
@@ -1004,6 +1375,8 @@
   }
 
   function runCheck() {
+    if (!userName) { $('#welcome-modal').hidden = false; return; }
+    if (!stage || !pieces.length) { openModal('Pilih level terlebih dahulu', '<p>Pilih fokus pembelajaran dan level sebelum memeriksa jawaban.</p>'); return; }
     clearMarks();
     const work = $$('#work-zone > .piece');
     const issues = [];
@@ -1015,8 +1388,19 @@
       expectedHtml.map(function (p) { return p.content.trim(); }));
     let htmlOk = 0;
     got.forEach(function (e, i) { if (keep[i]) { e.classList.add('ok'); htmlOk++; } else e.classList.add('bad'); });
-    if (got.length - htmlOk > 0) issues.push('HTML: ' + (got.length - htmlOk) + ' blok urutannya masih salah (ditandai merah).');
-    if (expectedHtml.length - got.length > 0) issues.push('HTML: ' + (expectedHtml.length - got.length) + ' blok belum dipasang.');
+    const checkHtml = focus === 'html' || stage.key === 'semua';
+    if (checkHtml) {
+      if (got.length - htmlOk > 0) issues.push('HTML: ' + (got.length - htmlOk) + ' potongan dokumen belum pada urutan yang benar.');
+      if (expectedHtml.length - got.length > 0) issues.push('HTML: ' + (expectedHtml.length - got.length) + ' potongan dokumen belum dipasang.');
+    }
+    if (focus === 'html') {
+      const perfectHtml = !issues.length && got.length === expectedHtml.length;
+      const scoreResult = perfectHtml ? recordScore() : null;
+      openModal(perfectHtml ? '🎉 Dokumen HTML lengkap!' : 'Hasil pemeriksaan HTML', perfectHtml
+        ? (playMode === 'ujian' ? '<p>Susunan dokumen sudah benar. Skor ujian: <b>' + scoreResult.score + '/100</b> · waktu ' + formatStopwatch(scoreResult.seconds) + '.</p>' : '<p>Susunan dokumen sudah benar. Level selesai dalam mode latihan; skor dan stopwatch tidak digunakan.</p>')
+        : '<p>Periksa urutan elemen dokumen. Potongan hijau sudah tepat, merah perlu dipindah.</p><ul>' + issues.slice(0, 8).map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul>');
+      return;
+    }
 
     // --- CSS: baca susunan siswa sebagai aturan ---
     const state = {};
@@ -1063,14 +1447,14 @@
     }
     if (stray) issues.push('CSS: ' + stray + ' baris berada di luar aturan (tidak ada selektor / sudah ditutup).');
 
-    const perfect = !issues.length && got.length === expectedHtml.length && rulesOk === stageRules.length;
+    const perfect = !issues.length && rulesOk === stageRules.length;
+    const scoreResult = perfect ? recordScore() : null;
     const body =
       '<div class="stat-row">' +
-        '<div class="stat"><b>' + htmlOk + '/' + expectedHtml.length + '</b>blok HTML benar</div>' +
         '<div class="stat"><b>' + rulesOk + '/' + stageRules.length + '</b>aturan CSS benar</div>' +
       '</div>' +
       (perfect
-        ? '<p>Semua potongan sudah tersusun benar. Bandingkan hasilnya dengan Target, lalu coba perluas panelnya dan ubah lebar ke HP.</p>'
+        ? (playMode === 'ujian' ? '<p>Semua potongan sudah tersusun benar. Skor ujian: <b>' + scoreResult.score + '/100</b> · waktu ' + formatStopwatch(scoreResult.seconds) + '.</p>' : '<p>Semua potongan sudah tersusun benar. Level selesai dalam mode latihan; skor dan stopwatch tidak digunakan.</p>')
         : '<p>Yang perlu diperbaiki:</p><ul>' + issues.slice(0, 8).map(function (i) { return '<li>' + i + '</li>'; }).join('') + '</ul>' +
           (issues.length > 8 ? '<p>…dan ' + (issues.length - 8) + ' catatan lainnya.</p>' : '') +
           '<p>Potongan hijau sudah tepat, merah perlu dipindah.</p>');
@@ -1085,6 +1469,47 @@
   function closeModal() { modal.hidden = true; }
   $('#modal-close').addEventListener('click', closeModal);
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+
+  const welcomeModal = $('#welcome-modal');
+  $('#welcome-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = $('#full-name').value.trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    store('puzzle-portofolio-user', name);
+    setProfile(name);
+    welcomeModal.hidden = true;
+    clearStage();
+  });
+  const profileModal = $('#profile-modal');
+  $('#profile-button').addEventListener('click', function () { renderReport(); profileModal.hidden = false; });
+  $('#mobile-profile-button').addEventListener('click', function () { renderReport(); profileModal.hidden = false; });
+  $$('.mobile-dock [data-picker]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const pickerId = button.dataset.picker, picker = document.getElementById(pickerId);
+      if (!picker) return;
+      const label = pickerId === 'play-mode' ? 'Pilih mode' : pickerId === 'focus' ? 'Pilih fokus' : 'Pilih level';
+      const choices = Array.prototype.map.call(picker.options, function (option) {
+        return '<button type="button" class="mobile-choice" data-picker="' + pickerId + '" data-value="' + esc(option.value) + '"' + (option.disabled ? ' disabled' : '') + '>' + esc(option.textContent) + '</button>';
+      }).join('');
+      openModal(label, '<div class="mobile-choice-list">' + choices + '</div>');
+    });
+  });
+  $('#modal-body').addEventListener('click', function (e) {
+    const choice = e.target.closest('.mobile-choice');
+    if (!choice || choice.disabled) return;
+    const picker = document.getElementById(choice.dataset.picker);
+    closeModal();
+    if (!picker || picker.value === choice.dataset.value) return;
+    picker.value = choice.dataset.value;
+    picker.dispatchEvent(new Event('change', { bubbles:true }));
+  });
+  $('#profile-close').addEventListener('click', function () { profileModal.hidden = true; });
+  profileModal.addEventListener('click', function (e) { if (e.target === profileModal) profileModal.hidden = true; });
+  $('#profile-print').addEventListener('click', function () { renderReport(); window.print(); });
+  $('#profile-exit').addEventListener('click', function () {
+    clearAppSession();
+    location.reload();
+  });
 
   /* =====================================================================
      DRAG & DROP (pointer events: mouse, sentuh, stylus)
@@ -1210,28 +1635,93 @@
   // Pilihan bagian
   const stageSel = $('#stage');
   STAGES.forEach(function (s) { const o = document.createElement('option'); o.value = s.key; o.textContent = s.label; stageSel.appendChild(o); });
+  const focusSel = $('#focus');
+  const playModeSel = $('#play-mode');
+  function registerExamSwitch() {
+    if (playMode !== 'ujian' || examLocked) return;
+    examSwitchCount++;
+    store('puzzle-portofolio-exam-switches', String(examSwitchCount));
+    if (examSwitchCount >= 5) {
+      examLocked = true;
+      store('puzzle-portofolio-exam-locked', '1');
+      const examOption = playModeSel.querySelector('option[value="ujian"]');
+      examOption.disabled = true;
+      playMode = 'latihan';
+      playModeSel.value = 'latihan';
+      store('puzzle-portofolio-play-mode', 'latihan');
+      updateStopwatch();
+      alert('Mode Ujian dikunci untuk sesi ini karena sudah 5 kali berpindah fokus, level, atau mode. Kamu masih bisa melanjutkan dengan Mode Latihan.');
+    }
+  }
+  function confirmAttemptChange(kind) {
+    if (!stage) return true;
+    const nextCount = playMode === 'ujian' ? examSwitchCount + 1 : examSwitchCount;
+    let message = 'Mengganti ' + kind + ' akan menghapus semua susunan pada level yang sedang dikerjakan. Skor level yang belum selesai tidak akan tercatat. Lanjutkan?';
+    if (playMode === 'ujian' && nextCount >= 5) message += '\n\nIni perpindahan ke-5 saat Ujian dan akan mengunci Mode Ujian sampai sesi berakhir.';
+    else if (playMode === 'ujian' && nextCount === 4) message += '\n\nPeringatan: satu perpindahan lagi akan mengunci Mode Ujian.';
+    return window.confirm(message);
+  }
+  function updateStageMenu() {
+    STAGES.forEach(function (s) {
+      const option = Array.prototype.find.call(stageSel.options, function (o) { return o.value === s.key; });
+      if (!option) return;
+      const completed = results.some(function (r) { return r.focus === focus.toUpperCase() && r.mode === 'Ujian' && (r.stageKey === s.key || (!r.stageKey && r.level === s.label)); });
+      option.textContent = (completed ? '✅ ' : '') + s.label;
+      option.classList.toggle('exam-complete', completed);
+    });
+  }
+  function requestAttemptChange(kind, apply, cancel) {
+    const activeAttempt = !!stage && !levelRecorded;
+    if (activeAttempt && !confirmAttemptChange(kind)) { if (cancel) cancel(); return false; }
+    if (stage) {
+      removeStore('puzzle-portofolio-' + focus + '-' + stage.key);
+      if (focus === 'css') removeStore('puzzle-portofolio-' + stage.key);
+      if (activeAttempt) registerExamSwitch();
+    }
+    apply();
+    return true;
+  }
+  playModeSel.addEventListener('change', function () {
+    const nextMode = playModeSel.value === 'ujian' ? 'ujian' : 'latihan', previousMode = playMode;
+    if (nextMode === previousMode) return;
+    if (nextMode === 'ujian' && examLocked) { playModeSel.value = 'latihan'; alert('Mode Ujian dikunci untuk sesi ini. Kamu masih bisa bermain dalam Mode Latihan.'); return; }
+    requestAttemptChange('mode', function () {
+      playMode = nextMode;
+      store('puzzle-portofolio-play-mode', playMode);
+      if (stage) loadStage(stage.key);
+      else resetLevelClock();
+      updateStopwatch();
+    }, function () { playModeSel.value = previousMode; });
+  });
+  focusSel.value = focus;
+  focusSel.addEventListener('change', function () {
+    const previousFocus = focus, nextFocus = focusSel.value;
+    if (nextFocus === previousFocus) return;
+    requestAttemptChange('fokus', function () {
+      focus = nextFocus;
+      store('puzzle-portofolio-focus', focus);
+      let nextThemeIndex = Math.floor(Math.random() * THEMES.length);
+      const previousThemeIndex = Number(store('puzzle-portofolio-theme-' + focus));
+      if (THEMES.length > 1 && nextThemeIndex === previousThemeIndex) nextThemeIndex = (nextThemeIndex + 1) % THEMES.length;
+      theme = THEMES[nextThemeIndex];
+      store('puzzle-portofolio-theme-' + focus, String(nextThemeIndex));
+      updateStageMenu();
+      if (stage) loadStage(stage.key);
+      else clearStage();
+    }, function () { focusSel.value = previousFocus; });
+  });
   stageSel.addEventListener('change', function () {
-    const key = stageSel.value, prev = stage.key;
+    const key = stageSel.value, prev = stage ? stage.key : '';
+    if (key === prev) return;
+    if (!key) { requestAttemptChange('level', clearStage, function () { stageSel.value = prev; }); return; }
     if (key === 'semua') {
-      askMode({ onPick: function (m) { switchStage('semua', m); }, onCancel: function () { stageSel.value = prev; } });
-    } else switchStage(key);
+      askMode({ onPick: function (m) { requestAttemptChange('level', function () { switchStage('semua', m); }, function () { stageSel.value = prev; }); }, onCancel: function () { stageSel.value = prev; } });
+    } else requestAttemptChange('level', function () { switchStage(key); }, function () { stageSel.value = prev; });
   });
   // Pindah bagian: bila sudah ada potongan tersusun, beri peringatan karena jawaban akan direset
   function switchStage(key, m) {
-    const placed = workZone.querySelectorAll(':scope > .piece').length;
-    const go = function () {
-      store('puzzle-portofolio-' + stage.key, '');          // hapus susunan bagian lama
-      loadStage(key);
-      if (key === 'semua') setMode(m);
-    };
-    if (!placed) { go(); return; }
-    askConfirm({
-      title: 'Pindah bagian?',
-      body: '<p>Kamu sudah menyusun <b>' + placed + ' potongan</b> di bagian ini.</p>' +
-            '<p>Kalau pindah, <b>semua jawaban akan direset</b> dan tidak bisa dikembalikan.</p>',
-      onOk: go,
-      onCancel: function () { stageSel.value = stage.key; }
-    });
+    loadStage(key);
+    if (key === 'semua') setMode(m);
   }
 
   // Saring potongan
@@ -1315,7 +1805,8 @@
   const PANEL_IDS = ['panel-src', 'panel-work', 'panel-target', 'panel-preview'];
   const HARD_MS = 60000;
   let mode = 'standar';
-  const hard = { timer: 0, next: 0, layout: 0, assign: [0, 1, 2, 3] };   // assign[i] = nomor sel layout untuk PANEL_IDS[i]
+  const hard = { timer: 0, next: 0, lastSoundStep: null, layout: 0, assign: [0, 1, 2, 3] };   // assign[i] = nomor sel layout untuk PANEL_IDS[i]
+  let hardAudio = null;
   const modeModal = $('#mode-modal');
   let modeCtx = null, toastTimer = 0;
 
@@ -1354,6 +1845,34 @@
     t.textContent = msg; t.hidden = false;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.hidden = true; }, 2200);
+  }
+
+  function unlockHardAudio() {
+    if (hardAudio) {
+      if (hardAudio.state === 'suspended') hardAudio.resume().catch(function () {});
+      return;
+    }
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    try {
+      hardAudio = new AudioContextClass();
+      if (hardAudio.state === 'suspended') hardAudio.resume().catch(function () {});
+    } catch (e) { hardAudio = null; }
+  }
+  function playHardTick(secondsLeft) {
+    unlockHardAudio();
+    if (!hardAudio || hardAudio.state !== 'running') return;
+    const now = hardAudio.currentTime;
+    const oscillator = hardAudio.createOscillator();
+    const gain = hardAudio.createGain();
+    const finalTen = secondsLeft <= 10;
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(finalTen ? 760 + (10 - secondsLeft) * 34 : 620, now);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.065);
+    oscillator.connect(gain); gain.connect(hardAudio.destination);
+    oscillator.start(now); oscillator.stop(now + 0.07);
   }
 
   // Katalog pola layout pada grid 24 kolom x 12 baris: sel = [kolom awal, lebar kolom, baris awal, tinggi baris]
@@ -1429,12 +1948,29 @@
         hard.layout = n.layout; hard.assign = n.assign;
         applySlots(true);
         hard.next = Date.now() + HARD_MS;
+        hard.lastSoundStep = null;
         left = HARD_MS;
-        toast('🔀 Jendela berpindah! · ' + LAYOUTS[hard.layout].name);
+        toast('Jendela berpindah · ' + LAYOUTS[hard.layout].name);
       }
     }
-    const sec = Math.ceil(left / 1000);
-    $('#hard-time').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    const secondsLeft = Math.max(0, left / 1000);
+    const sec = Math.ceil(secondsLeft);
+    let soundStep;
+    if (left <= 10000) {
+      const halfSecondStep = Math.ceil(Math.max(0, left) / 500);
+      soundStep = 'half-' + halfSecondStep;
+      const displaySeconds = Math.floor(halfSecondStep / 2);
+      const half = halfSecondStep % 2 ? '.5' : '.0';
+      $('#hard-time').textContent = Math.floor(displaySeconds / 60) + ':' + String(displaySeconds % 60).padStart(2, '0') + half;
+    } else {
+      soundStep = 'second-' + sec;
+      $('#hard-time').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    }
+    if (left > 0 && soundStep !== hard.lastSoundStep) {
+      playHardTick(secondsLeft);
+      hard.lastSoundStep = soundStep;
+    }
+    updateMobileClock();
     $('#hard-box').classList.toggle('warn', left <= 5000);
     $('#hard-fill').style.width = (left / HARD_MS * 100) + '%';
   }
@@ -1446,10 +1982,12 @@
     hard.layout = n.layout; hard.assign = n.assign;
     applySlots(false);
     hard.next = Date.now() + HARD_MS;
+    hard.lastSoundStep = null;
+    unlockHardAudio();
     hard.timer = setInterval(tick, 250);
     $('#hard-box').hidden = false;
     tick();
-    toast('🔥 Mode Hard! Pola pertama: ' + LAYOUTS[hard.layout].name);
+    toast('Mode jendela bergerak · ' + LAYOUTS[hard.layout].name);
   }
   function stopHard() {
     clearInterval(hard.timer); hard.timer = 0;
@@ -1461,25 +1999,56 @@
     });
     $$('.tabs button').forEach(function (b) { b.style.order = ''; });
     $('#hard-box').hidden = true;
+    updateMobileClock();
   }
   function setMode(m) {
     mode = m;
-    $('#btn-mode').textContent = m === 'hard' ? '🔥 Mode: Hard' : '🧩 Mode: Standar';
+    $('#btn-mode').textContent = m === 'hard' ? '🔥 Hard' : 'Standar';
+    $('#btn-mode').title = m === 'hard' ? 'Mode Hard: jendela bergerak' : 'Mode Standar: jendela tetap';
+    $('#btn-mode').setAttribute('aria-label', m === 'hard' ? 'Ganti ke mode standar' : 'Ganti ke mode Hard');
     if (m === 'hard') startHard(); else stopHard();
   }
 
   /* =====================================================================
      MULAI
      ===================================================================== */
-  const wanted = params.get('bagian') || store('puzzle-portofolio-stage') || 'navbar';
-  const wantedMode = params.get('mode');
-  if (wanted === 'semua') {
-    if (wantedMode === 'hard' || wantedMode === 'standar') { loadStage('semua'); setMode(wantedMode); }
-    else {
-      loadStage('navbar');
-      askMode({ onPick: function (m) { loadStage('semua'); setMode(m); }, onCancel: function () { } });
-    }
-  } else loadStage(wanted);
+  const storedUser = store('puzzle-portofolio-user') || '';
+  if (!storedUser) clearAppSession();
+  const savedPlayMode = storedUser ? store('puzzle-portofolio-play-mode') : null;
+  playMode = savedPlayMode === 'ujian' ? 'ujian' : 'latihan';
+  examSwitchCount = Math.max(0, parseInt(store('puzzle-portofolio-exam-switches') || '0', 10) || 0);
+  examLocked = store('puzzle-portofolio-exam-locked') === '1';
+  if (examLocked) playMode = 'latihan';
+  $('#play-mode').value = playMode;
+  $('#play-mode').querySelector('option[value="ujian"]').disabled = examLocked;
+  const savedFocus = storedUser ? store('puzzle-portofolio-focus') : null;
+  focus = params.get('fokus') === 'html' || params.get('fokus') === 'css' ? params.get('fokus') :
+    (storedUser && (savedFocus === 'html' || savedFocus === 'css') ? savedFocus : 'html');
+  $('#focus').value = focus;
+  let savedThemeIndex = Number(store('puzzle-portofolio-theme-' + focus));
+  if (!Number.isInteger(savedThemeIndex) || savedThemeIndex < 0 || savedThemeIndex >= THEMES.length) {
+    savedThemeIndex = Math.floor(Math.random() * THEMES.length);
+    store('puzzle-portofolio-theme-' + focus, String(savedThemeIndex));
+  }
+  theme = THEMES[savedThemeIndex];
+  store('puzzle-portofolio-focus', focus);
+  userName = storedUser;
+  try { results = JSON.parse(store('puzzle-portofolio-results') || '[]'); } catch (e) { results = []; }
+  if (!Array.isArray(results)) results = [];
+  updateStageMenu();
+  if (userName) {
+    setProfile(userName);
+    welcomeModal.hidden = true;
+    const savedStage = store('puzzle-portofolio-stage');
+    if (savedStage && STAGES.some(function (s) { return s.key === savedStage; })) loadStage(savedStage);
+    else clearStage();
+  } else {
+    $('#profile-button').hidden = true;
+    $('#mobile-profile-button').hidden = true;
+    clearStage();
+    welcomeModal.hidden = false;
+    $('#full-name').focus();
+  }
 })();
 </script>
 </body>
